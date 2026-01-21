@@ -10,6 +10,11 @@
 # Ignore all environment files (except templates).
 /.env*
 !/.env*.erb
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # Ignore all logfiles and tempfiles.
 /log/*
@@ -31,3 +36,76 @@
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
+
+# Ignore test coverage reports
+/coverage/
+/coverage.json
+
+# Ignore node modules (if using any frontend assets)
+node_modules/
+/node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignore IDE and editor files
+/.idea
+/.vscode
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.settings
+*.sublime-project
+*.sublime-workspace
+
+# Ignore database dumps
+*.sql
+*.sqlite
+*.sqlite3
+
+# Ignore Ruby version managers
+/.ruby-version
+/.ruby-gemset
+/.rvmrc
+
+# Ignore credentials
+/config/credentials/*.key
+
+# Ignore uploaded files in development
+/public/uploads
+/public/system
+/public/packs
+/public/packs-test
+
+# Ignore yarn files
+yarn.lock
+/yarn-error.log
+
+# Ignore Webpack files
+/public/webpack
+/public/assets
+
+# Ignore SimpleCov coverage reports
+coverage/
+.resultset.json
+
+# Ignore RuboCop cache
+.rubocop-*
+
+# Ignore Brakeman reports
+/brakeman.html
+
+# Ignore Spring files
+/spring/*.pid
+
+# Ignore byebug history
+.byebug_history
+
+# Ignore test artifacts
+/spec/tmp
+/spec/examples.txt
+
+# Ignore docker volumes
+/docker-volumes/
