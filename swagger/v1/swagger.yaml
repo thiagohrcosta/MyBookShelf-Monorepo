@@ -1,0 +1,881 @@
+openapi: 3.0.1
+info:
+  title: MyBookShelf API
+  version: v1
+  description: API for managing personal bookshelves, book reviews, and reading statistics
+  contact:
+    name: MyBookShelf API Support
+
+paths:
+  # ===== AUTHENTICATION & USERS =====
+  /api/v1/users/register:
+    post:
+      summary: Register a new user
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    full_name:
+                      type: string
+                    email:
+                      type: string
+                      format: email
+                    password:
+                      type: string
+                    password_confirmation:
+                      type: string
+                  required:
+                    - full_name
+                    - email
+                    - password
+                    - password_confirmation
+      responses:
+        '201':
+          description: User registered successfully
+        '422':
+          description: Validation error
+
+  /api/v1/users/{id}/profile:
+    get:
+      summary: Get user profile
+      tags:
+        - Users
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User profile retrieved
+        '404':
+          description: User not found
+
+    patch:
+      summary: Update user profile
+      tags:
+        - Users
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    full_name:
+                      type: string
+      responses:
+        '200':
+          description: Profile updated successfully
+        '422':
+          description: Validation error
+
+  # ===== BOOKS =====
+  /api/v1/books:
+    get:
+      summary: List all books
+      tags:
+        - Books
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Books retrieved successfully
+
+    post:
+      summary: Create a new book
+      tags:
+        - Books
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                book:
+                  $ref: '#/components/schemas/BookInput'
+      responses:
+        '201':
+          description: Book created successfully
+        '422':
+          description: Validation error
+
+  /api/v1/books/{id}:
+    get:
+      summary: Get a book by ID
+      tags:
+        - Books
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Book retrieved successfully
+        '404':
+          description: Book not found
+
+    patch:
+      summary: Update a book
+      tags:
+        - Books
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                book:
+                  $ref: '#/components/schemas/BookInput'
+      responses:
+        '200':
+          description: Book updated successfully
+        '422':
+          description: Validation error
+
+    delete:
+      summary: Delete a book
+      tags:
+        - Books
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Book deleted successfully
+        '404':
+          description: Book not found
+
+  # ===== AUTHORS =====
+  /api/v1/authors:
+    get:
+      summary: List all authors
+      tags:
+        - Authors
+      responses:
+        '200':
+          description: Authors retrieved successfully
+
+    post:
+      summary: Create a new author
+      tags:
+        - Authors
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                author:
+                  $ref: '#/components/schemas/AuthorInput'
+      responses:
+        '201':
+          description: Author created successfully
+        '422':
+          description: Validation error
+
+  /api/v1/authors/{id}:
+    get:
+      summary: Get an author by ID
+      tags:
+        - Authors
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Author retrieved successfully
+        '404':
+          description: Author not found
+
+    patch:
+      summary: Update an author
+      tags:
+        - Authors
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                author:
+                  $ref: '#/components/schemas/AuthorInput'
+      responses:
+        '200':
+          description: Author updated successfully
+        '422':
+          description: Validation error
+
+    delete:
+      summary: Delete an author
+      tags:
+        - Authors
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Author deleted successfully
+        '404':
+          description: Author not found
+
+  # ===== PUBLISHERS =====
+  /api/v1/publishers:
+    get:
+      summary: List all publishers
+      tags:
+        - Publishers
+      responses:
+        '200':
+          description: Publishers retrieved successfully
+
+    post:
+      summary: Create a new publisher
+      tags:
+        - Publishers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                publisher:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                  required:
+                    - name
+      responses:
+        '201':
+          description: Publisher created successfully
+        '422':
+          description: Validation error
+
+  /api/v1/publishers/{id}:
+    get:
+      summary: Get a publisher by ID
+      tags:
+        - Publishers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Publisher retrieved successfully
+        '404':
+          description: Publisher not found
+
+    patch:
+      summary: Update a publisher
+      tags:
+        - Publishers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                publisher:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+      responses:
+        '200':
+          description: Publisher updated successfully
+        '422':
+          description: Validation error
+
+    delete:
+      summary: Delete a publisher
+      tags:
+        - Publishers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Publisher deleted successfully
+        '404':
+          description: Publisher not found
+
+  # ===== BOOK REVIEWS =====
+  /api/v1/book_reviews:
+    get:
+      summary: List all book reviews
+      tags:
+        - Reviews
+      responses:
+        '200':
+          description: Reviews retrieved successfully
+
+    post:
+      summary: Create a new book review
+      tags:
+        - Reviews
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                book_review:
+                  $ref: '#/components/schemas/ReviewInput'
+      responses:
+        '201':
+          description: Review created successfully
+        '422':
+          description: Validation error
+
+  /api/v1/book_reviews/{id}:
+    delete:
+      summary: Delete a review
+      tags:
+        - Reviews
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Review deleted successfully
+        '404':
+          description: Review not found
+
+  # ===== BOOK LISTS (SHELVES) =====
+  /api/v1/book_lists:
+    get:
+      summary: List user's book lists
+      tags:
+        - BookLists
+      responses:
+        '200':
+          description: Book lists retrieved successfully
+
+    post:
+      summary: Add a book to user's list
+      tags:
+        - BookLists
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                book_list:
+                  $ref: '#/components/schemas/BookListInput'
+      responses:
+        '201':
+          description: Book added to list successfully
+        '422':
+          description: Validation error
+
+  /api/v1/book_lists/{id}:
+    patch:
+      summary: Update book list status
+      tags:
+        - BookLists
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                book_list:
+                  type: object
+                  properties:
+                    status:
+                      type: string
+                      enum: [acquired, reading, finished, abandoned, wishlist]
+      responses:
+        '200':
+          description: Book list updated successfully
+        '422':
+          description: Validation error
+
+    delete:
+      summary: Remove a book from list
+      tags:
+        - BookLists
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Book removed from list successfully
+        '404':
+          description: Book list not found
+
+  # ===== READ BOOKS =====
+  /api/v1/read_books:
+    get:
+      summary: List user's read books
+      tags:
+        - ReadBooks
+      responses:
+        '200':
+          description: Read books retrieved successfully
+
+    post:
+      summary: Register a book as read
+      tags:
+        - ReadBooks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                read_book:
+                  $ref: '#/components/schemas/ReadBookInput'
+      responses:
+        '201':
+          description: Book registered as read successfully
+        '422':
+          description: Validation error
+
+  # ===== DASHBOARD =====
+  /api/v1/dashboard:
+    get:
+      summary: Get user dashboard with reading statistics
+      tags:
+        - Dashboard
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Dashboard data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reading_statistics:
+                    type: object
+                    properties:
+                      total_read:
+                        type: integer
+                      this_month:
+                        type: integer
+                      this_year:
+                        type: integer
+                  last_10_books_read:
+                    type: array
+                  last_reviews:
+                    type: array
+                  latest_global_books:
+                    type: array
+        '404':
+          description: User not found
+
+  # ===== HOME PAGE =====
+  /api/v1/home:
+    get:
+      summary: Get home page data with latest content
+      tags:
+        - Home
+      responses:
+        '200':
+          description: Home page data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  latest_books:
+                    type: array
+                  latest_publishers:
+                    type: array
+                  latest_reviews:
+                    type: array
+                  api_version:
+                    type: string
+
+  # ===== SUBSCRIPTIONS =====
+  /api/v1/subscriptions/{id}:
+    get:
+      summary: Get subscription details
+      tags:
+        - Subscriptions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Subscription retrieved successfully
+        '404':
+          description: Subscription not found
+
+  /api/v1/subscriptions:
+    post:
+      summary: Create a new subscription
+      tags:
+        - Subscriptions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subscription:
+                  $ref: '#/components/schemas/SubscriptionInput'
+      responses:
+        '201':
+          description: Subscription created successfully
+        '422':
+          description: Validation error
+
+  /api/v1/subscriptions/webhook:
+    post:
+      summary: Handle Stripe webhook events
+      tags:
+        - Subscriptions
+      responses:
+        '200':
+          description: Webhook event received
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+
+components:
+  schemas:
+    Book:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        original_title:
+          type: string
+        summary:
+          type: string
+        pages:
+          type: integer
+        edition:
+          type: string
+        release_year:
+          type: integer
+        author_id:
+          type: integer
+        publisher_id:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    BookInput:
+      type: object
+      properties:
+        title:
+          type: string
+        original_title:
+          type: string
+        summary:
+          type: string
+        pages:
+          type: integer
+        edition:
+          type: string
+        release_year:
+          type: integer
+        author_id:
+          type: integer
+        publisher_id:
+          type: integer
+      required:
+        - title
+        - edition
+        - author_id
+        - publisher_id
+
+    Author:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        nationality:
+          type: string
+        biography:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    AuthorInput:
+      type: object
+      properties:
+        name:
+          type: string
+        nationality:
+          type: string
+        biography:
+          type: string
+      required:
+        - name
+
+    Publisher:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Review:
+      type: object
+      properties:
+        id:
+          type: integer
+        rating:
+          type: integer
+          minimum: 0
+          maximum: 10
+        review:
+          type: string
+        user_id:
+          type: integer
+        book_id:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ReviewInput:
+      type: object
+      properties:
+        rating:
+          type: integer
+          minimum: 0
+          maximum: 10
+        review:
+          type: string
+        user_id:
+          type: integer
+        book_id:
+          type: integer
+      required:
+        - rating
+        - review
+        - user_id
+        - book_id
+
+    BookList:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        book_id:
+          type: integer
+        status:
+          type: string
+          enum: [acquired, reading, finished, abandoned, wishlist]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    BookListInput:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        book_id:
+          type: integer
+        status:
+          type: string
+          enum: [acquired, reading, finished, abandoned, wishlist]
+      required:
+        - user_id
+        - book_id
+        - status
+
+    ReadBook:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        book_id:
+          type: integer
+        month:
+          type: integer
+          minimum: 1
+          maximum: 12
+        year:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ReadBookInput:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        book_id:
+          type: integer
+        month:
+          type: integer
+          minimum: 1
+          maximum: 12
+        year:
+          type: integer
+      required:
+        - user_id
+        - book_id
+        - month
+        - year
+
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        stripe_id:
+          type: string
+        status:
+          type: string
+          enum: [active, canceled, expired]
+        current_period_start:
+          type: string
+          format: date-time
+        current_period_end:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    SubscriptionInput:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        stripe_id:
+          type: string
+        status:
+          type: string
+          enum: [active, canceled, expired]
+        current_period_start:
+          type: string
+          format: date-time
+        current_period_end:
+          type: string
+          format: date-time
+      required:
+        - user_id
+        - stripe_id
+        - status

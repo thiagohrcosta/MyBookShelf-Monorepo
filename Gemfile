@@ -27,11 +27,54 @@ gem "bootsnap", require: false
 # gem "image_processing", "~> 1.2"
 
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin Ajax possible
-# gem "rack-cors"
+gem "rack-cors"
+
+# Authentication and Authorization
+gem "devise"
+gem "jwt"
+gem "pundit"
+
+# Image storage and processing
+gem "aws-sdk-s3", require: false
+gem "cloudinary"
+
+# Payments
+gem "stripe"
+
+# API Documentation
+gem "rswag-api"
+gem "rswag-ui"
+
+# HTTP Client
+gem "httparty"
+
+# Serializers
+gem "active_model_serializers"
+
+# Pagination
+gem "kaminari"
+
+# Error Handling
+gem "sentry-rails"
+gem "sentry-ruby"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri mswin mswin64 mingw x64_mingw ], require: "debug/prelude"
+
+  # Environment variables
+  gem "dotenv-rails"
+
+  # Debugging
+  gem "pry-rails"
+
+  # Testing
+  gem "rspec-rails"
+  gem "factory_bot_rails"
+  gem "shoulda-matchers"
+  gem "simplecov"
+  gem "faker"
+  gem "rswag-specs"
 
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
   gem "brakeman", require: false
