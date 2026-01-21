@@ -2,7 +2,7 @@
 ## 🧠 Project Background & AI-Assisted Development Process
 See project instructions in [INSTRUCTION_README.md](INSTRUCTION_README.md).
 
-**21, JANUARY - 2026**
+**21, JANUARY - 2026** <br>
 The development of this project started at **2:30 PM (14:30) on January 21, 2026**, as a practical initiative to design, implement, and document the complete development lifecycle of a modern **API-only application**, applying the best software engineering practices currently adopted by the market.
 
 A central focus of this project was the **strategic use of Artificial Intelligence as an agile development tool**, positioning the author in the role of a **mid-level to senior software engineer**, responsible for guiding how a **junior developer** should proceed throughout the project. This included identifying mistakes, suggesting improvements, enforcing best practices, and continuously steering development decisions toward scalable and maintainable solutions.
