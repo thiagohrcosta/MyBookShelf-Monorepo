@@ -1,381 +1,170 @@
-📚 MyBookShelf API
 
-MyBookShelf is a Ruby on Rails API-only application for managing personal bookshelves, book reviews, and reading statistics.
+## 🧠 Project Background & AI-Assisted Development Process
+See project instructions in [INSTRUCTION_README.md](INSTRUCTION_README.md).
 
-This project follows clean architecture, explicit business rules, full test coverage, and complete API documentation.
+**21, JANUARY - 2026**
+The development of this project started at **2:30 PM (14:30) on January 21, 2026**, as a practical initiative to design, implement, and document the complete development lifecycle of a modern **API-only application**, applying the best software engineering practices currently adopted by the market.
 
-This README is intentionally detailed so that GitHub Copilot (VS Code) can follow the project standards and generate consistent code.
+A central focus of this project was the **strategic use of Artificial Intelligence as an agile development tool**, positioning the author in the role of a **mid-level to senior software engineer**, responsible for guiding how a **junior developer** should proceed throughout the project. This included identifying mistakes, suggesting improvements, enforcing best practices, and continuously steering development decisions toward scalable and maintainable solutions.
 
-🧱 Tech Stack
-Backend
+This project demonstrates not only technical proficiency in backend development but also how AI can be effectively leveraged to **accelerate project initialization and evolution**, enabling in a matter of hours what traditionally required days or weeks before reaching a testable state.
 
-Ruby on Rails (API only)
+---
 
-PostgreSQL
+### Initial Setup and Copilot Guidance
 
-Devise (authentication)
+The project began with the creation of a detailed **README.md**, containing explicit architectural guidelines, business rules, stack definitions, and development standards. This document served as the primary source of instructions for **GitHub Copilot**, ensuring consistent code generation aligned with the project’s goals.
 
-JWT (token-based auth)
+Once instructed, Copilot proved effective in:
 
-Active Storage
+- Creating the initial Rails API-only project structure
+- Installing the main gems required by the project
+- Executing initial setup commands
+- Generating empty or baseline configuration files
 
-Cloudinary (image storage)
+This significantly reduced the time required to bootstrap the project from scratch, allowing the use of **project-specific dependencies** rather than relying on generic and poorly adaptable boilerplates.
 
-Stripe (subscriptions & billing)
+---
 
-Testing
+### Limitations, Human Review, and Key Adjustments
 
-RSpec
+Despite its efficiency, Copilot initially overlooked that several gems require **explicit post-installation steps** and complementary dependencies to function correctly.
 
-FactoryBot
+One concrete example involved environment variable management. When the application failed to access values defined in the `.env` file, Copilot was unable to identify that the root cause was the **absence of the `dotenv` gem**. It was therefore necessary to explicitly instruct Copilot to:
 
-Shoulda Matchers
+- Add the `dotenv-rails` gem to the `Gemfile`
+- Run `bundle install`
+- Reload the application environment
 
-SimpleCov
+Only after these steps was the issue with environment variable loading resolved.
 
-Documentation
+Copilot also showed limitations when dealing with more complex setup scenarios, notably:
 
-Swagger (OpenAPI)
+- **Devise**, due to:
+  - Required generators not being executed automatically
+  - API-only configuration nuances
+  - JWT authentication flow adjustments
+  - The absence of traditional Rails views
 
-rswag
+- **Active Storage and Cloudinary**, where additional guidance was required to:
+  - Properly configure Active Record
+  - Establish a correct connection with Cloudinary
+  - Ensure compatibility within an API-only context
 
-HTTP Client (development)
+After careful human review and more precise instructions, Copilot was able to adjust the setup and complete the correct configuration of Devise, environment variables, Active Storage, and Cloudinary.
 
-Axios (frontend integration / CORS support)
+---
 
-🧩 Architecture & Conventions
+### Authentication Scope in the Initial Version
 
-API only (--api)
+Although the project requirements explicitly requested **JWT-based authentication**, the initial implementation followed **Devise’s default authentication flow**. As a result, in this first version it was possible to perform **direct CRUD operations without enforcing proper authentication or authorization checks**.
 
-Controllers must be thin
+This limitation was intentionally accepted at this stage, as the primary goal of the first development round was to validate:
 
-Business logic must live in:
+- Project structure
+- Data modeling
+- Endpoint availability
+- Test coverage
+- API documentation
 
-app/services
+The authentication flow will be **revisited and hardened in the next development iteration**, after a careful analysis of the requirements defined in the README and the actual deliverables produced by the AI in this first phase.
 
-app/queries (for complex queries)
+---
 
-No logic inside serializers
+### Routing, Testing, and Swagger Documentation
 
-JSON responses must be consistent
+The `routes.rb` file was not generated as expected, likely because routing conventions were not explicitly detailed in the initial README. After providing clear instructions regarding:
 
-Versioned API (/api/v1)
+- API versioning using `/api/v1`
+- RESTful routing standards
+- Swagger integration
 
-Authorization via policies or service objects
+Copilot successfully created and organized the routing layer.
 
-All endpoints must be tested
+Once routes and core resources were defined, Copilot was instructed to:
 
-All endpoints must be documented in Swagger
+- Create **model tests**
+- Create **request tests** for all endpoints
+- Edit or create models and controllers as needed to ensure testability
 
-🔐 Authentication & Authorization
-Authentication
+---
 
-Devise for user management
+### Test Coverage Evolution
 
-JWT for API authentication
+Initially, Copilot generated **53 automated tests**, reaching **69% total test coverage**, as measured by the **SimpleCov** report.
 
-Token required on all protected endpoints
+After reviewing the coverage report, Copilot was explicitly instructed to:
 
-Authorization rules
+- Analyze uncovered files
+- Add missing tests
+- Improve overall test coverage where feasible
 
-Any user can view public data
+Based on these new instructions:
 
-Only authenticated users can:
+- The test suite increased to **83 tests**
+- Overall coverage reached **83.71%**
 
-Add books to their bookshelf
+The remaining uncovered files corresponded to **methods and structures already created but not yet implemented**, indicating that this percentage represents the **maximum achievable coverage at the current stage of development**.
 
-Post reviews (with conditions)
+---
 
-Only users with an active Stripe subscription can:
+### MVP Readiness, Time Investment, and Results
 
-Create new books
+The first AI-assisted development iteration started at **2:30PM** and ended at **4:30PM**, totaling approximately **2 hours of effective development time**.
 
-Create new authors
+By **4:30 PM**, starting entirely from scratch, the application had already reached a functional **MVP**, featuring:
 
-Create new publishers
+- Full CRUD endpoints for all core entities
+- User authentication via API (initial Devise-based flow)
+- Ability to register and log in users
+- Ability to create publishers, authors, and books
+- External image storage fully integrated with **Cloudinary**
+- **83 automated model and request tests**
+- Approximately **83% total test coverage**
+- Complete API documentation available via **Swagger**
 
-👤 User
-Attributes
+---
 
-full_name
+### Final State at This Stage
 
-email
+At the end of this first development phase, the project included:
 
-password
+- All core gems installed and configured
+- Database schema correctly modeled according to the README specifications
+- All required models and controllers created
+- **83 model and request tests**, ensuring high confidence in core API behavior
+- Fully documented API via **Swagger**
+- External services properly integrated, including **Cloudinary**
 
-password_confirmation
+---
 
-has_one_attached :avatar
+### General Feedback and Outcome
 
-Associations
+From a broader perspective, this first development round clearly demonstrates the **impact of AI-assisted software development when combined with precise guidance and continuous human supervision**.
 
-has_many :book_reviews
+A project of this scope, which would traditionally take **several days or even a full week** to reach a usable and testable state, was successfully brought to a solid **MVP in approximately 2 hours**.
 
-has_many :book_lists
+The key factor enabling this acceleration was not AI alone, but rather:
 
-has_many :read_books
+- Well-defined requirements
+- Explicit architectural guidance
+- Continuous review of generated code
+- Immediate correction of mistakes and gaps
 
-has_one :subscription
+This approach made it possible to achieve **exceptional development speed without sacrificing code quality**, resulting in a clean, well-tested, and well-documented MVP.
 
-🏢 Publisher (Editora)
-Attributes
+---
 
-name
+### Project Status and Next Steps
 
-Rules
+This project is **still under active development**.
 
-Name must be unique (case insensitive)
+The **README.md will continue to be updated** to reflect:
+- New development phases
+- Architectural refinements
+- Security improvements
+- CI/CD pipeline implementation
+- Code quality and security tooling
+- Full JWT authentication and authorization enforcement
 
-✍️ Author
-Attributes
-
-name
-
-nationality
-
-biography
-
-has_one_attached :photo
-
-📖 Book
-Attributes
-
-title
-
-original_title
-
-summary
-
-pages
-
-edition (Brazil, US, France, etc)
-
-release_year
-
-author_id
-
-publisher_id
-
-has_one_attached :box_cover
-
-Rules
-
-A book cannot have the same title + edition duplicated
-
-Different editions of the same book may coexist
-
-Examples
-
-Allowed:
-
-"O Iluminado" (PT-BR)
-
-"The Shining" (US)
-
-Not allowed:
-
-Another "O Iluminado" (PT-BR)
-
-Another "The Shining" (US)
-
-Associations
-
-belongs_to :author
-
-belongs_to :publisher
-
-has_many :book_reviews
-
-has_many :book_lists
-
-⭐ Book Review
-Description
-
-A registered user can rate and review a book.
-
-Attributes
-
-rating (0 to 10)
-
-review
-
-user_id
-
-book_id
-
-Rules
-
-A user can only review a book if the book is marked as acquired
-
-A user can only review a book once
-
-📚 BookList (Bookshelf)
-Description
-
-Represents a book inside a user’s personal library.
-
-Status enum
-
-acquired
-
-reading
-
-finished
-
-abandoned
-
-wishlist
-
-Associations
-
-belongs_to :user
-
-belongs_to :book
-
-📆 Read Books Registry
-Description
-
-When a book is marked as finished, a record must be created.
-
-Attributes
-
-user_id
-
-book_id
-
-month
-
-year
-
-Rules
-
-Used for reading statistics
-
-Must allow filtering by month and year
-
-📊 User Dashboard Endpoint
-Must return
-
-Reading statistics
-
-Last 10 books read
-
-Last reviews posted by the user
-
-Last books created on the platform (global)
-
-🏠 Home Page Endpoint
-Must return
-
-Latest books created
-
-Latest publishers created
-
-Latest reviews and ratings
-
-🔍 Book Search
-Endpoints
-
-GET /books
-
-List books
-
-Show global average rating only
-
-GET /books/:id
-
-Full book details
-
-Reviews and ratings
-
-💳 Subscriptions (Stripe)
-Rules
-
-Users must have an active subscription to:
-
-Create books
-
-Create authors
-
-Create publishers
-
-Without subscription:
-
-User can log in
-
-View all content
-
-View their own data
-
-🧪 Testing Requirements
-
-100% coverage on:
-
-Models
-
-Requests
-
-Services
-
-RSpec for all endpoints
-
-FactoryBot for data creation
-
-Shoulda Matchers for validations & associations
-
-SimpleCov enabled by default
-
-📄 API Documentation
-
-All endpoints must be documented with Swagger
-
-Request examples
-
-Response examples
-
-Error responses
-
-🖼️ Image Storage
-
-Active Storage
-
-Cloudinary as provider
-
-Used for:
-
-User avatars
-
-Author photos
-
-Book covers
-
-📁 Suggested Folder Structure
-app/
-  controllers/
-    api/
-      v1/
-  models/
-  services/
-  queries/
-  serializers/
-  policies/
-spec/
-  requests/
-  models/
-  services/
-
-🚀 Final Notes for Copilot
-
-Follow RESTful conventions
-
-Prefer explicit code over magic
-
-Do not skip validations
-
-Always write tests
-
-Always update Swagger
-
-Keep controllers minimal
-
-Business rules must be enforced at model or service level
+Future iterations will build upon this foundation, further strengthening the platform while maintaining the same development standards and AI-assisted workflow.
