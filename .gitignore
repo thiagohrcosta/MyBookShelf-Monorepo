@@ -109,3 +109,11 @@ coverage/
 
 # Ignore docker volumes
 /docker-volumes/
+
+backend/log/*
+backend/tmp/*
+backend/tmp/**/*
+backend/coverage/*
+backend/storage/*
+backend/node_modules/
+backend/.bundle/
