@@ -187,13 +187,3 @@ With proper instructions, Copilot was able to add JWT-based authentication and a
 After being instructed, Copilot updated all tests, totaling 85 completed tests with overall coverage above 83% (considering that there are files with methods created but not yet implemented). The Swagger documentation was also successfully updated. <br>
 
 To maintain code standardization and consistency, Copilot was instructed to install Rubocop and run the necessary code inspections, applying the required adjustments to ensure codebase uniformity. Additionally, Brakeman was introduced with the goal of strengthening application security and achieving full integration with the CI/CD workflow. With Brakeman in place, it was possible to proactively avoid issues related to Ruby End of Life versions and upgrade to a more recent and secure Ruby version.<br>
-
-**23, JANUARY 2026**
-Development started at: 13:30AM <br>
-Development finished at: 14:30PM <br>
-
-This commit introduces a monorepo structure for the MyBookShelf project, separating the Rails API backend from future web and mobile clients.
-
-The backend was successfully containerized using Docker and orchestrated with Docker Compose, including a PostgreSQL service. This setup ensures a reproducible and consistent development environment while preparing the project for multiple clients (Next.js and React Native) within the same repository.
-
-This change establishes a solid infrastructure foundation, enabling faster iteration, easier onboarding, and a clear product-oriented architecture.
