@@ -1,6 +1,7 @@
 module Api
   module V1
     class AuthorsController < ApplicationController
+      before_action :authenticate_user!, except: %i[index show]
       def index
         authors = Author.all
         render json: authors.map { |author| author_payload(author) }, status: :ok
@@ -10,11 +11,11 @@ module Api
         author = Author.find(params[:id])
         render json: author_payload(author), status: :ok
       rescue ActiveRecord::RecordNotFound
-        render json: { error: 'Author not found' }, status: :not_found
+        render json: { error: "Author not found" }, status: :not_found
       end
 
       def create
-        @author = Author.new(author_params)
+        @author = current_user.authors.new(author_params)
         if @author.save
           render json: @author, status: :created
         else
@@ -30,7 +31,7 @@ module Api
           render json: { errors: @author.errors }, status: :unprocessable_entity
         end
       rescue ActiveRecord::RecordNotFound
-        render json: { error: 'Author not found' }, status: :not_found
+        render json: { error: "Author not found" }, status: :not_found
       end
 
       def destroy
@@ -38,7 +39,7 @@ module Api
         @author.destroy
         head :no_content
       rescue ActiveRecord::RecordNotFound
-        render json: { error: 'Author not found' }, status: :not_found
+        render json: { error: "Author not found" }, status: :not_found
       end
 
       private

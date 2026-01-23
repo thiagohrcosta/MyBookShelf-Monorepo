@@ -1,18 +1,15 @@
 module Api
   module V1
     class DashboardController < ApplicationController
-      def index
-        user_id = params[:user_id]
-        @user = User.find(user_id)
+      before_action :authenticate_user!
 
+      def index
         render json: {
-          reading_statistics: reading_stats(@user),
-          last_10_books_read: last_books_read(@user),
-          last_reviews: last_reviews(@user),
+          reading_statistics: reading_stats(current_user),
+          last_10_books_read: last_books_read(current_user),
+          last_reviews: last_reviews(current_user),
           latest_global_books: latest_books
         }, status: :ok
-      rescue ActiveRecord::RecordNotFound
-        render json: { error: 'User not found' }, status: :not_found
       end
 
       private
@@ -20,8 +17,8 @@ module Api
       def reading_stats(user)
         {
           total_read: user.read_books.count,
-          this_month: user.read_books.where('month = ?', Date.today.month).count,
-          this_year: user.read_books.where('year = ?', Date.today.year).count
+          this_month: user.read_books.where("month = ?", Date.today.month).count,
+          this_year: user.read_books.where("year = ?", Date.today.year).count
         }
       end
 

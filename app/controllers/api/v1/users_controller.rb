@@ -1,31 +1,42 @@
 module Api
   module V1
     class UsersController < ApplicationController
+      before_action :authenticate_user!, only: %i[profile update_profile logout]
+
       def register
         @user = User.new(user_params)
         if @user.save
-          render json: { user: @user, message: 'User registered successfully' }, status: :created
+          token = JsonWebToken.encode(user_id: @user.id, role: @user.role)
+          render json: { user: @user, token: token, message: "User registered successfully" }, status: :created
         else
           render json: { errors: @user.errors }, status: :unprocessable_entity
         end
+      end
+
+      def login
+        user = User.find_by(email: params[:email])
+        if user&.valid_password?(params[:password])
+          token = JsonWebToken.encode(user_id: user.id, role: user.role)
+          render json: { token: token, user: user }, status: :ok
+        else
+          render json: { error: "Invalid email or password" }, status: :unauthorized
+        end
+      end
+
+      def logout
+        render json: { message: "Logged out successfully" }, status: :ok
       end
 
       def profile
-        @user = User.find(params[:user_id])
-        render json: @user, status: :ok
-      rescue ActiveRecord::RecordNotFound
-        render json: { error: 'User not found' }, status: :not_found
+        render json: current_user, status: :ok
       end
 
       def update_profile
-        @user = User.find(params[:user_id])
-        if @user.update(user_update_params)
-          render json: @user, status: :ok
+        if current_user.update(user_update_params)
+          render json: current_user, status: :ok
         else
-          render json: { errors: @user.errors }, status: :unprocessable_entity
+          render json: { errors: current_user.errors }, status: :unprocessable_entity
         end
-      rescue ActiveRecord::RecordNotFound
-        render json: { error: 'User not found' }, status: :not_found
       end
 
       private

@@ -2,6 +2,7 @@ class Book < ApplicationRecord
   has_one_attached :box_cover
   belongs_to :author
   belongs_to :publisher
+  belongs_to :user
   has_many :book_reviews, dependent: :destroy
   has_many :book_lists, dependent: :destroy
   has_many :read_books, dependent: :destroy

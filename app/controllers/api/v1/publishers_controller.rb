@@ -1,6 +1,7 @@
 module Api
   module V1
     class PublishersController < ApplicationController
+      before_action :authenticate_user!, except: %i[index show]
       def index
         @publishers = Publisher.all
         render json: @publishers, status: :ok
@@ -10,11 +11,11 @@ module Api
         @publisher = Publisher.find(params[:id])
         render json: @publisher, status: :ok
       rescue ActiveRecord::RecordNotFound
-        render json: { error: 'Publisher not found' }, status: :not_found
+        render json: { error: "Publisher not found" }, status: :not_found
       end
 
       def create
-        @publisher = Publisher.new(publisher_params)
+        @publisher = current_user.publishers.new(publisher_params)
         if @publisher.save
           render json: @publisher, status: :created
         else
@@ -30,7 +31,7 @@ module Api
           render json: { errors: @publisher.errors }, status: :unprocessable_entity
         end
       rescue ActiveRecord::RecordNotFound
-        render json: { error: 'Publisher not found' }, status: :not_found
+        render json: { error: "Publisher not found" }, status: :not_found
       end
 
       def destroy
@@ -38,7 +39,7 @@ module Api
         @publisher.destroy
         head :no_content
       rescue ActiveRecord::RecordNotFound
-        render json: { error: 'Publisher not found' }, status: :not_found
+        render json: { error: "Publisher not found" }, status: :not_found
       end
 
       private

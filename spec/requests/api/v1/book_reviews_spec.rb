@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe "Api::V1::BookReviews", type: :request do
+  let(:user) { create(:user) }
   describe "GET /api/v1/books/:book_id/reviews" do
     it "returns all book reviews for a book" do
       book = create(:book)
@@ -22,17 +23,16 @@ RSpec.describe "Api::V1::BookReviews", type: :request do
 
   describe "POST /api/v1/book_reviews" do
     it "creates a new book review" do
-      user = create(:user)
       book = create(:book)
 
-      post '/api/v1/book_reviews', params: { book_review: { user_id: user.id, book_id: book.id, rating: 8, review: 'Great book!' } }
+      post '/api/v1/book_reviews', params: { book_review: { book_id: book.id, rating: 8, review: 'Great book!' } }, headers: auth_headers(user)
 
       expect(response).to have_http_status(:created)
       expect(JSON.parse(response.body)['rating']).to eq(8)
     end
 
     it "returns error with invalid data" do
-      post '/api/v1/book_reviews', params: { book_review: { rating: 8 } }
+      post '/api/v1/book_reviews', params: { book_review: { rating: 8 } }, headers: auth_headers(user)
 
       expect(response).to have_http_status(:unprocessable_entity)
     end
@@ -40,15 +40,15 @@ RSpec.describe "Api::V1::BookReviews", type: :request do
 
   describe "DELETE /api/v1/book_reviews/:id" do
     it "deletes a review" do
-      review = create(:book_review)
+      review = create(:book_review, user: user)
 
-      delete "/api/v1/book_reviews/#{review.id}"
+      delete "/api/v1/book_reviews/#{review.id}", headers: auth_headers(user)
 
       expect(response).to have_http_status(:no_content)
     end
 
     it "returns 404 when review not found" do
-      delete '/api/v1/book_reviews/99999'
+      delete '/api/v1/book_reviews/99999', headers: auth_headers(user)
 
       expect(response).to have_http_status(:not_found)
     end

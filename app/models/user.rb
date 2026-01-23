@@ -8,6 +8,12 @@ class User < ApplicationRecord
   has_many :book_lists
   has_many :read_books
   has_one :subscription
+  has_many :authors
+  has_many :publishers
+  has_many :books
+
+  enum role: { user: "user", admin: "admin" }
 
   validates :full_name, presence: true
+  validates :role, presence: true
 end

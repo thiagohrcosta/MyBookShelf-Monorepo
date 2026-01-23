@@ -1,8 +1,8 @@
 FactoryBot.define do
   factory :read_book do
-    user { nil }
-    book { nil }
+    association :user
+    association :book
     month { 1 }
-    year { 1 }
+    year { 2025 }
   end
 end

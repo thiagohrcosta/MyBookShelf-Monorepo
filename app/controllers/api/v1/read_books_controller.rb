@@ -1,13 +1,15 @@
 module Api
   module V1
     class ReadBooksController < ApplicationController
+      before_action :authenticate_user!
+
       def index
-        @read_books = ReadBook.all
+        @read_books = current_user.read_books
         render json: @read_books, status: :ok
       end
 
       def create
-        @read_book = ReadBook.new(read_book_params)
+        @read_book = current_user.read_books.new(read_book_params)
         if @read_book.save
           render json: @read_book, status: :created
         else
@@ -18,7 +20,7 @@ module Api
       private
 
       def read_book_params
-        params.require(:read_book).permit(:user_id, :book_id, :month, :year)
+        params.require(:read_book).permit(:book_id, :month, :year)
       end
     end
   end
