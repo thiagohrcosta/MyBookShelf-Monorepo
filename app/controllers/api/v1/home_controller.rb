@@ -6,7 +6,7 @@ module Api
           latest_books: latest_books,
           latest_publishers: latest_publishers,
           latest_reviews: latest_reviews,
-          api_version: 'v1'
+          api_version: "v1"
         }, status: :ok
       end
 

@@ -4,5 +4,5 @@ class ReadBook < ApplicationRecord
 
   validates :month, presence: true, inclusion: { in: 1..12 }
   validates :year, presence: true
-  validates :user_id, uniqueness: { scope: [:book_id, :month, :year] }
+  validates :user_id, uniqueness: { scope: [ :book_id, :month, :year ] }
 end
