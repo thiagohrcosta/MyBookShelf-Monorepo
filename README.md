@@ -174,10 +174,16 @@ Future iterations will build upon this foundation, further strengthening the pla
 
 **DEVELOPMENT 23, JANUARY, 2025**
 
-Development was resumed to initially address issues related to the JWT implementation identified on the first day. This ensured that only registered and authenticated users on the platform can publish or edit content. It was also added that only an administrator can delete a registered book, publisher, or author, preventing destructive actions by users after content creation. One of the business rules allows users to create their own authors, publishers, and books, giving them freedom to create lesser-known content while maintaining control over deletions.<br>
+DEVELOPMENT 23, JANUARY, 2025 <br>
+Development started at: 11:30AM <br>
+Development finished at: 12:30PM <br>
+
+Development was resumed to initially address issues related to the JWT implementation identified on the first day. This ensured that only registered and authenticated users on the platform can publish or edit content. It was also added that only an administrator can delete a registered book, publisher, or author, preventing destructive actions by users after content creation. One of the business rules allows users to create their own authors, publishers, and books, giving them freedom to create lesser-known content while maintaining control over deletions. <br>
+
+The development of these new features started at 11:30 PM and concluded at 12:30 AM, totaling one additional hour of development, during which JWT authentication was fully implemented, automated tests were updated, and the Swagger documentation was revised and finalized. <br>
 
 With proper instructions, Copilot was able to add JWT-based authentication and automatically include validations in the controllers, ensuring that public routes could be accessed without authentication. <br>
 
-After being instructed, Copilot updated all tests, totaling 85 completed tests with overall coverage above 83% (considering that there are files with methods created but not yet implemented). <br>
+After being instructed, Copilot updated all tests, totaling 85 completed tests with overall coverage above 83% (considering that there are files with methods created but not yet implemented). The Swagger documentation was also successfully updated. <br>
 
-The Swagger documentation was also successfully updated. <br>
+To maintain code standardization and consistency, Copilot was instructed to install Rubocop and run the necessary code inspections, applying the required adjustments to ensure codebase uniformity. Additionally, Brakeman was introduced with the goal of strengthening application security and achieving full integration with the CI/CD workflow. With Brakeman in place, it was possible to proactively avoid issues related to Ruby End of Life versions and upgrade to a more recent and secure Ruby version.<br>
