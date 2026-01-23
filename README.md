@@ -171,3 +171,13 @@ The **README.md will continue to be updated** to reflect:
 - Full JWT authentication and authorization enforcement
 
 Future iterations will build upon this foundation, further strengthening the platform while maintaining the same development standards and AI-assisted workflow.
+
+**DEVELOPMENT 23, JANUARY, 2025**
+
+Development was resumed to initially address issues related to the JWT implementation identified on the first day. This ensured that only registered and authenticated users on the platform can publish or edit content. It was also added that only an administrator can delete a registered book, publisher, or author, preventing destructive actions by users after content creation. One of the business rules allows users to create their own authors, publishers, and books, giving them freedom to create lesser-known content while maintaining control over deletions.<br>
+
+With proper instructions, Copilot was able to add JWT-based authentication and automatically include validations in the controllers, ensuring that public routes could be accessed without authentication. <br>
+
+After being instructed, Copilot updated all tests, totaling 85 completed tests with overall coverage above 83% (considering that there are files with methods created but not yet implemented). <br>
+
+The Swagger documentation was also successfully updated. <br>

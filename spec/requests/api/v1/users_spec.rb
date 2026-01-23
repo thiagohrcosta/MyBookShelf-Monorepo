@@ -5,7 +5,7 @@ RSpec.describe "Api::V1::Users", type: :request do
     it "returns user profile" do
       user = create(:user)
 
-      get "/api/v1/users/profile", params: { user_id: user.id }
+      get "/api/v1/users/profile", headers: auth_headers(user)
 
       expect(response).to have_http_status(:ok)
       json = JSON.parse(response.body)
@@ -13,10 +13,10 @@ RSpec.describe "Api::V1::Users", type: :request do
       expect(json['email']).to eq(user.email)
     end
 
-    it "returns 404 when user not found" do
-      get '/api/v1/users/profile', params: { user_id: 99999 }
+    it "returns unauthorized without token" do
+      get '/api/v1/users/profile'
 
-      expect(response).to have_http_status(:not_found)
+      expect(response).to have_http_status(:unauthorized)
     end
   end
 
@@ -24,22 +24,22 @@ RSpec.describe "Api::V1::Users", type: :request do
     it "updates user profile" do
       user = create(:user)
 
-      patch "/api/v1/users/profile", params: { user_id: user.id, user: { full_name: 'Updated Name' } }
+      patch "/api/v1/users/profile", params: { user: { full_name: 'Updated Name' } }, headers: auth_headers(user)
 
       expect(response).to have_http_status(:ok)
       expect(JSON.parse(response.body)['full_name']).to eq('Updated Name')
     end
 
-    it "returns 404 when user not found" do
-      patch '/api/v1/users/profile', params: { user_id: 99999, user: { full_name: 'Test' } }
+    it "returns unauthorized without token" do
+      patch '/api/v1/users/profile', params: { user: { full_name: 'Test' } }
 
-      expect(response).to have_http_status(:not_found)
+      expect(response).to have_http_status(:unauthorized)
     end
 
     it "returns error with invalid data" do
       user = create(:user)
 
-      patch "/api/v1/users/profile", params: { user_id: user.id, user: { full_name: '' } }
+      patch "/api/v1/users/profile", params: { user: { full_name: '' } }, headers: auth_headers(user)
 
       expect(response).to have_http_status(:unprocessable_entity)
     end

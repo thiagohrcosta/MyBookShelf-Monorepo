@@ -43,33 +43,64 @@ paths:
         '422':
           description: Validation error
 
-  /api/v1/users/{id}/profile:
-    get:
-      summary: Get user profile
+  /api/v1/users/login:
+    post:
+      summary: Login with email and password to receive a JWT
       tags:
         - Users
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          description: Login successful
+        '401':
+          description: Invalid credentials
+
+  /api/v1/users/logout:
+    post:
+      summary: Logout current user (client should discard the JWT)
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logged out successfully
+        '401':
+          description: Unauthorized
+
+  /api/v1/users/profile:
+    get:
+      summary: Get current user profile
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: User profile retrieved
-        '404':
-          description: User not found
+        '401':
+          description: Unauthorized
 
     patch:
-      summary: Update user profile
+      summary: Update current user profile
       tags:
         - Users
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
+      security:
+        - bearerAuth: []
       requestBody:
         content:
           application/json:
@@ -84,6 +115,8 @@ paths:
       responses:
         '200':
           description: Profile updated successfully
+        '401':
+          description: Unauthorized
         '422':
           description: Validation error
 
@@ -106,6 +139,8 @@ paths:
       summary: Create a new book
       tags:
         - Books
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -142,6 +177,8 @@ paths:
       summary: Update a book
       tags:
         - Books
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -166,6 +203,8 @@ paths:
       summary: Delete a book
       tags:
         - Books
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -192,6 +231,8 @@ paths:
       summary: Create a new author
       tags:
         - Authors
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -228,6 +269,8 @@ paths:
       summary: Update an author
       tags:
         - Authors
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -252,6 +295,8 @@ paths:
       summary: Delete an author
       tags:
         - Authors
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -278,6 +323,8 @@ paths:
       summary: Create a new publisher
       tags:
         - Publishers
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -319,6 +366,8 @@ paths:
       summary: Update a publisher
       tags:
         - Publishers
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -346,6 +395,8 @@ paths:
       summary: Delete a publisher
       tags:
         - Publishers
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -372,6 +423,8 @@ paths:
       summary: Create a new book review
       tags:
         - Reviews
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -392,6 +445,8 @@ paths:
       summary: Delete a review
       tags:
         - Reviews
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -410,6 +465,8 @@ paths:
       summary: List user's book lists
       tags:
         - BookLists
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: Book lists retrieved successfully
@@ -418,6 +475,8 @@ paths:
       summary: Add a book to user's list
       tags:
         - BookLists
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -438,6 +497,8 @@ paths:
       summary: Update book list status
       tags:
         - BookLists
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -466,6 +527,8 @@ paths:
       summary: Remove a book from list
       tags:
         - BookLists
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -484,6 +547,8 @@ paths:
       summary: List user's read books
       tags:
         - ReadBooks
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: Read books retrieved successfully
@@ -492,6 +557,8 @@ paths:
       summary: Register a book as read
       tags:
         - ReadBooks
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -513,12 +580,8 @@ paths:
       summary: Get user dashboard with reading statistics
       tags:
         - Dashboard
-      parameters:
-        - name: user_id
-          in: query
-          required: true
-          schema:
-            type: integer
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: Dashboard data retrieved successfully
@@ -574,6 +637,8 @@ paths:
       summary: Get subscription details
       tags:
         - Subscriptions
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -591,6 +656,8 @@ paths:
       summary: Create a new subscription
       tags:
         - Subscriptions
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -620,6 +687,12 @@ servers:
     description: Development server
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     Book:
       type: object
@@ -749,14 +822,11 @@ components:
           maximum: 10
         review:
           type: string
-        user_id:
-          type: integer
         book_id:
           type: integer
       required:
         - rating
         - review
-        - user_id
         - book_id
 
     BookList:
@@ -781,15 +851,12 @@ components:
     BookListInput:
       type: object
       properties:
-        user_id:
-          type: integer
         book_id:
           type: integer
         status:
           type: string
           enum: [acquired, reading, finished, abandoned, wishlist]
       required:
-        - user_id
         - book_id
         - status
 
@@ -818,8 +885,6 @@ components:
     ReadBookInput:
       type: object
       properties:
-        user_id:
-          type: integer
         book_id:
           type: integer
         month:
@@ -829,7 +894,6 @@ components:
         year:
           type: integer
       required:
-        - user_id
         - book_id
         - month
         - year
@@ -862,8 +926,6 @@ components:
     SubscriptionInput:
       type: object
       properties:
-        user_id:
-          type: integer
         stripe_id:
           type: string
         status:
@@ -876,6 +938,5 @@ components:
           type: string
           format: date-time
       required:
-        - user_id
         - stripe_id
         - status
