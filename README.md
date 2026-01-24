@@ -192,8 +192,28 @@ To maintain code standardization and consistency, Copilot was instructed to inst
 Development started at: 13:30AM <br>
 Development finished at: 14:30PM <br>
 
-This commit introduces a monorepo structure for the MyBookShelf project, separating the Rails API backend from future web and mobile clients.
+This commit introduces a monorepo structure for the MyBookShelf project, separating the Rails API backend from future web and mobile clients.<br>
 
-The backend was successfully containerized using Docker and orchestrated with Docker Compose, including a PostgreSQL service. This setup ensures a reproducible and consistent development environment while preparing the project for multiple clients (Next.js and React Native) within the same repository.
+The backend was containerized using Docker and orchestrated with Docker Compose, including a PostgreSQL service. This setup provides a reproducible and consistent development environment while preparing the project to support multiple clients (Next.js and React Native) within a single repository.<br>
 
-This change establishes a solid infrastructure foundation, enabling faster iteration, easier onboarding, and a clear product-oriented architecture.
+At this infrastructure layer, AI-assisted development was intentionally not applied. The goal was to maintain full human control over system boundaries, orchestration decisions, and architectural consistency, ensuring a reliable and well-defined foundation for the product.<br>
+
+This change establishes a solid infrastructure baseline, enabling faster iteration, easier onboarding, and a clear, product-oriented architecture.<br>
+
+### January 24, 2026  <br>
+**Development started at:** 10:30 AM  <br>
+**Development finished at:** 12:30 PM  <br>
+
+The objective of this development session was to provide **clear and structured instructions** for GitHub Copilot to create a **Next.js project** following modern frontend best practices, including the use of **Tailwind CSS** and a component-based architecture. <br>
+
+During this phase, Copilot was able to successfully generate the **initial structural setup** of the Next.js project, correctly organizing folders, configurations, and base components. However, it faced some limitations when translating the **Figma layout into code**. <br>
+
+At a certain point, despite explicit instructions, Copilot failed to understand that a component was placed **outside of its intended parent container**, which resulted in unnecessary spacing issues. Instead of addressing the root cause, it repeatedly attempted to fix the problem by adjusting margins.<br>
+
+After identifying this behavior, Copilot was explicitly instructed that the issue was structural rather than stylistic, and that the correct solution was to **move the component into the proper layout block**. Once this guidance was provided, the issue was resolved.<br>
+
+Copilot also showed some difficulty when integrating the frontend with the backend API. In these cases, it was necessary to explicitly provide the **updated backend routes** so that the correct requests could be implemented.<br>
+
+By the end of this session, Copilot was able to generate approximately **90% of the Figma-based implementation** with good quality, covering both the **home page** and the **book show page**.<br>
+
+Overall, this phase demonstrated that while AI can significantly accelerate frontend development, **precise human guidance and continuous review** remain essential, especially when dealing with layout structure and cross-layer integration.<br>
