@@ -12,7 +12,7 @@ class User < ApplicationRecord
   has_many :publishers
   has_many :books
 
-  enum role: { user: "user", admin: "admin" }
+  enum :role, { user: "user", admin: "admin" }
 
   validates :full_name, presence: true
   validates :role, presence: true

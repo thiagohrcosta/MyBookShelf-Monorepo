@@ -7,7 +7,7 @@ class Book < ApplicationRecord
   has_many :book_lists, dependent: :destroy
   has_many :read_books, dependent: :destroy
 
-  enum language_version: {
+  enum :language_version, {
     pt_br: "PT-BR",
     pt: "PT",
     en: "EN",
