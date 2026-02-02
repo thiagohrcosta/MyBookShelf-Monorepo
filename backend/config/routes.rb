@@ -19,6 +19,7 @@ Rails.application.routes.draw do
 
       # Books Routes
       resources :books, only: [ :index, :show, :create, :update, :destroy ]
+      get "books_with_reviews", to: "books_with_reviews#index"
 
       # Authors Routes
       resources :authors, only: [ :index, :show, :create, :update, :destroy ]
@@ -29,6 +30,7 @@ Rails.application.routes.draw do
       # Book Reviews Routes
       resources :book_reviews, only: [ :create, :destroy ]
       get "books/:book_id/reviews", to: "book_reviews#index"
+      get "book_reviews/recent", to: "book_reviews#recent"
 
       # Book Lists (Shelves) Routes
       resources :book_lists, only: [ :index, :create, :update, :destroy ]

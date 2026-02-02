@@ -38,11 +38,16 @@ export function Header() {
   return (
     <header className="flex items-center justify-between px-8 py-6 bg-white border-b border-gray-200">
       <div className="flex items-center gap-2">
-        <BookOpen className="w-6 h-6 text-gray-800" />
-        <span className="text-xl font-semibold text-gray-800">My Bookshelf</span>
+        <Link href="/" className="flex items-center gap-2">
+          <BookOpen className="w-6 h-6 text-gray-800" />
+          <span className="text-xl font-semibold text-gray-800">My Bookshelf</span>
+        </Link>
       </div>
 
       <nav className="flex items-center gap-8">
+        <Link href="/reviews" className="text-gray-700 hover:text-gray-900 transition-colors">
+          Reviews
+        </Link>
         {isAuthenticated ? (
           <Link href="/library" className="text-gray-700 hover:text-gray-900 transition-colors">
             My Library
@@ -53,11 +58,6 @@ export function Header() {
           </a>
         )}
         {isAuthenticated ? (
-          <Link href="/books/new" className="text-gray-700 hover:text-gray-900 transition-colors">
-            Adicionar Livro
-          </Link>
-        ) : null}
-        {isAuthenticated ? (
           <Link href="/statistics" className="text-gray-700 hover:text-gray-900 transition-colors">
             Statistics
           </Link>
@@ -66,6 +66,11 @@ export function Header() {
             Statistics
           </a>
         )}
+        {isAuthenticated ? (
+          <Link href="/books/new" className="text-gray-700 hover:text-gray-900 transition-colors">
+            Add Book
+          </Link>
+        ) : null}
         {isAuthenticated ? (
           <Link href="/profile" className="text-gray-700 hover:text-gray-900 transition-colors">
             Profile

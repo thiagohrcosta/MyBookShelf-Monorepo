@@ -24,6 +24,8 @@ interface ApiReview {
   rating: number;
   review: string;
   user_id: number;
+  user_name: string;
+  user_email: string;
   book_id: number;
   created_at: string;
   updated_at: string;
@@ -40,8 +42,8 @@ function formatReviewDate(dateValue: string) {
 }
 
 function mapReview(review: ApiReview): Review {
-  const author = review.user_id ? `Reader #${review.user_id}` : "Reader";
-  const avatar = review.user_id ? `U${review.user_id}` : "U";
+  const author = review.user_name || "Anonymous";
+  const avatar = review.user_name.substring(0, 1).toUpperCase();
 
   return {
     id: review.id,
