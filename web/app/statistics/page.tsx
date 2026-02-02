@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 import { Header } from "../components/header";
 import { useAuth } from "../context/auth-context";
 import {
@@ -57,7 +58,7 @@ const MONTH_NAMES_FULL = [
 
 export default function StatisticsPage() {
   const router = useRouter();
-  const { authFetch, isAuthenticated, isLoading } = useAuth();
+  const { authRequest, isAuthenticated, isLoading } = useAuth();
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
 
   const [data, setData] = useState<StatisticsData | null>(null);
@@ -79,18 +80,16 @@ export default function StatisticsPage() {
       }
 
       try {
-        const response = await authFetch(
-          `${baseUrl}/api/v1/statistics?year=${selectedYear}`
-        );
+        const response = await authRequest<StatisticsData>({
+          url: `${baseUrl}/api/v1/statistics?year=${selectedYear}`,
+          method: "GET"
+        });
 
-        if (!response.ok) {
-          setError("Unable to load statistics.");
-          return;
+        setData(response.data);
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          console.error("Error fetching statistics:", error.message);
         }
-
-        const statsData = await response.json();
-        setData(statsData);
-      } catch {
         setError("Unable to load statistics.");
       } finally {
         setIsFetching(false);
@@ -101,7 +100,7 @@ export default function StatisticsPage() {
       setIsFetching(true);
       fetchStatistics();
     }
-  }, [authFetch, baseUrl, isAuthenticated, isLoading, selectedYear]);
+  }, [authRequest, baseUrl, isAuthenticated, isLoading, selectedYear]);
 
   const handleYearChange = (direction: "prev" | "next") => {
     if (direction === "prev") {

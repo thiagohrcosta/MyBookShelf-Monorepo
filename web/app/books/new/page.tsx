@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import axios from "axios";
 
 import { Header } from "../../components/header";
 import { useAuth } from "../../context/auth-context";
@@ -35,7 +36,7 @@ interface NewBookFormValues {
 
 export default function NewBookPage() {
   const router = useRouter();
-  const { authFetch, isAuthenticated, isLoading } = useAuth();
+  const { authRequest, isAuthenticated, isLoading } = useAuth();
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
 
   const [authors, setAuthors] = useState<Author[]>([]);
@@ -82,22 +83,12 @@ export default function NewBookPage() {
 
       try {
         const [authorsRes, publishersRes] = await Promise.all([
-          authFetch(`${baseUrl}/api/v1/authors`),
-          authFetch(`${baseUrl}/api/v1/publishers`),
+          authRequest<Author[]>({ url: `${baseUrl}/api/v1/authors`, method: "GET" }),
+          authRequest<Publisher[]>({ url: `${baseUrl}/api/v1/publishers`, method: "GET" }),
         ]);
 
-        if (!authorsRes.ok || !publishersRes.ok) {
-          setError("Unable to load authors or publishers.");
-          return;
-        }
-
-        const [authorsData, publishersData] = await Promise.all([
-          authorsRes.json(),
-          publishersRes.json(),
-        ]);
-
-        setAuthors(authorsData || []);
-        setPublishers(publishersData || []);
+        setAuthors(authorsRes.data || []);
+        setPublishers(publishersRes.data || []);
       } catch {
         setError("Unable to load authors or publishers.");
       } finally {
@@ -108,7 +99,7 @@ export default function NewBookPage() {
     if (!isLoading) {
       fetchLookups();
     }
-  }, [authFetch, baseUrl, isAuthenticated, isLoading]);
+  }, [authRequest, baseUrl, isAuthenticated, isLoading]);
 
   const filteredAuthors = useMemo(() => {
     if (!authorQuery.trim()) return authors;
@@ -131,24 +122,24 @@ export default function NewBookPage() {
     setError(null);
 
     try {
-      const response = await authFetch(`${baseUrl}/api/v1/publishers`, {
+      const response = await authRequest<Publisher>({
+        url: `${baseUrl}/api/v1/publishers`,
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ publisher: { name: query } }),
+        data: { publisher: { name: query } },
       });
 
-      const data = await response.json().catch(() => null);
-      if (!response.ok) {
-        setError(data?.errors?.name?.[0] || "Unable to create the publisher.");
-        return;
-      }
-
-      const created = data as Publisher;
+      const created = response.data;
       setPublishers((prev) => [created, ...prev]);
       setSelectedPublisher(created);
       setValue("publisherQuery", created.name, { shouldDirty: true });
       setIsCreatingPublisher(false);
-    } catch {
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const data = error.response?.data as { errors?: Record<string, string[]> } | undefined;
+        setError(data?.errors?.name?.[0] || "Unable to create the publisher.");
+        return;
+      }
       setError("Unable to create the publisher.");
     } finally {
       setIsWorking(false);
@@ -162,32 +153,32 @@ export default function NewBookPage() {
     setError(null);
 
     try {
-      const response = await authFetch(`${baseUrl}/api/v1/authors`, {
+      const response = await authRequest<Author>({
+        url: `${baseUrl}/api/v1/authors`,
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        data: {
           author: {
             name: query,
             nationality: getValues("authorNationality") || "",
             biography: getValues("authorBiography") || "",
           },
-        }),
+        },
       });
 
-      const data = await response.json().catch(() => null);
-      if (!response.ok) {
-        setError(data?.errors?.name?.[0] || "Unable to create the author.");
-        return;
-      }
-
-      const created = data as Author;
+      const created = response.data;
       setAuthors((prev) => [created, ...prev]);
       setSelectedAuthor(created);
       setValue("authorQuery", created.name, { shouldDirty: true });
       setIsCreatingAuthor(false);
       setValue("authorNationality", "");
       setValue("authorBiography", "");
-    } catch {
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const data = error.response?.data as { errors?: Record<string, string[]> } | undefined;
+        setError(data?.errors?.name?.[0] || "Unable to create the author.");
+        return;
+      }
       setError("Unable to create the author.");
     } finally {
       setIsWorking(false);
@@ -218,23 +209,24 @@ export default function NewBookPage() {
         formData.append("book[box_cover]", values.box_cover[0]);
       }
 
-      const response = await authFetch(`${baseUrl}/api/v1/books`, {
+      const response = await authRequest<{ id: number }>({
+        url: `${baseUrl}/api/v1/books`,
         method: "POST",
-        body: formData,
+        data: formData,
       });
 
-      const data = await response.json().catch(() => null);
-      if (!response.ok) {
-        setError(data?.errors?.title?.[0] || "Unable to create the book.");
-        return;
-      }
-
+      const data = response.data;
       if (data?.id) {
         router.push(`/books/${data.id}`);
       } else {
         router.push("/");
       }
-    } catch {
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const data = error.response?.data as { errors?: Record<string, string[]> } | undefined;
+        setError(data?.errors?.title?.[0] || "Unable to create the book.");
+        return;
+      }
       setError("Unable to create the book.");
     } finally {
       setIsWorking(false);

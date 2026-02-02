@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 import { Header } from "@/app/components/header";
 import { BookCover } from "./book-cover";
 import { BookHeader } from "./book-header";
@@ -10,6 +11,7 @@ import { RatingSection } from "./rating-section";
 import { ReadingStatus } from "./reading-status";
 import { ReviewsSection } from "./reviews-section";
 import { OtherClassicsSection } from "./other-classics-section";
+import { BookReviewForm } from "./book-review-form";
 import { useAuth } from "@/app/context/auth-context";
 
 interface BookList {
@@ -49,14 +51,16 @@ interface BookDetailProps {
 export function BookDetail({ book, bookId }: BookDetailProps) {
   const [isRating, setIsRating] = useState(false);
   const router = useRouter();
-  const { isAuthenticated, authFetch } = useAuth();
+  const { isAuthenticated, authRequest } = useAuth();
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
   const [bookList, setBookList] = useState<BookList | null>(null);
   const [status, setStatus] = useState<string>("");
   const [readMonth, setReadMonth] = useState<string>("");
   const [readYear, setReadYear] = useState<string>("");
   const [isSaving, setIsSaving] = useState(false);
+  const [bookListLoading, setBookListLoading] = useState(false);
   const [statusError, setStatusError] = useState<string | null>(null);
+  const [reviewRefreshKey, setReviewRefreshKey] = useState(0);
 
   const yearOptions = useMemo(() => {
     const currentYear = new Date().getFullYear();
@@ -68,10 +72,13 @@ export function BookDetail({ book, bookId }: BookDetailProps) {
 
     async function loadBookList() {
       try {
-        const response = await authFetch(`${baseUrl}/api/v1/books/${bookId}/book_list`);
-        if (!response.ok) return;
+        setBookListLoading(true);
+        const response = await authRequest({
+          url: `${baseUrl}/api/v1/books/${bookId}/book_list`,
+          method: "GET"
+        });
 
-        const data = await response.json();
+        const data = response.data;
         if (data?.book_list === null) {
           setBookList(null);
           setStatus("");
@@ -86,11 +93,13 @@ export function BookDetail({ book, bookId }: BookDetailProps) {
         setReadYear(data.read_year ? String(data.read_year) : "");
       } catch {
         // ignore
+      } finally {
+        setBookListLoading(false);
       }
     }
 
     loadBookList();
-  }, [authFetch, baseUrl, bookId, isAuthenticated]);
+  }, [authRequest, baseUrl, bookId, isAuthenticated]);
 
   async function handleSaveStatus() {
     if (!status) {
@@ -107,35 +116,40 @@ export function BookDetail({ book, bookId }: BookDetailProps) {
     setStatusError(null);
 
     try {
-      const response = await authFetch(`${baseUrl}/api/v1/book_lists`, {
+      const response = await authRequest({
+        url: `${baseUrl}/api/v1/book_lists`,
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        data: {
           book_list: {
             book_id: book.id,
             status: status,
             read_month: readMonth ? Number(readMonth) : undefined,
             read_year: readYear ? Number(readYear) : undefined
           }
-        })
+        }
       });
 
-      const data = await response.json().catch(() => null);
-      if (!response.ok) {
-        setStatusError(data?.errors?.read_month?.[0] || "Unable to save status.");
-        return;
-      }
+      const data = response.data as BookList;
 
       setBookList(data as BookList);
       setStatus(data.status || status);
       setReadMonth(data.read_month ? String(data.read_month) : readMonth);
       setReadYear(data.read_year ? String(data.read_year) : readYear);
-    } catch {
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const data = error.response?.data as { errors?: Record<string, string[]> } | undefined;
+        setStatusError(data?.errors?.read_month?.[0] || "Unable to save status.");
+        return;
+      }
       setStatusError("Unable to save status.");
     } finally {
       setIsSaving(false);
     }
   }
+
+  const canReview = isAuthenticated && !bookListLoading && Boolean(bookList);
+  const showReviewForm = isRating && canReview;
 
   return (
     <>
@@ -180,7 +194,8 @@ export function BookDetail({ book, bookId }: BookDetailProps) {
                 <div className="flex gap-3">
                   <button
                     onClick={() => setIsRating(!isRating)}
-                    className="flex-1 bg-amber-50 hover:bg-amber-100 text-amber-900 font-medium py-3 px-4 rounded transition-colors"
+                    disabled={!canReview}
+                    className="flex-1 bg-amber-50 hover:bg-amber-100 text-amber-900 font-medium py-3 px-4 rounded transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     Rate this book
                   </button>
@@ -193,6 +208,32 @@ export function BookDetail({ book, bookId }: BookDetailProps) {
                     </button>
                   )}
                 </div>
+
+                {!isAuthenticated ? (
+                  <p className="text-xs text-gray-500">
+                    Sign in to add this book to your library and leave a review.
+                  </p>
+                ) : null}
+
+                {isAuthenticated && !bookListLoading && !bookList ? (
+                  <p className="text-xs text-gray-500">
+                    Add this book to your library to unlock reviews.
+                  </p>
+                ) : null}
+
+                {bookListLoading ? (
+                  <p className="text-xs text-gray-500">Checking your library status...</p>
+                ) : null}
+
+                {showReviewForm ? (
+                  <BookReviewForm
+                    bookId={bookId}
+                    onReviewCreated={() => {
+                      setReviewRefreshKey((prev) => prev + 1);
+                      setIsRating(false);
+                    }}
+                  />
+                ) : null}
 
                 {isAuthenticated && (
                   <div className="rounded-xl border border-stone-200 bg-white p-4 space-y-4">
@@ -284,7 +325,7 @@ export function BookDetail({ book, bookId }: BookDetailProps) {
             </div>
 
             {/* Reviews Section */}
-            <ReviewsSection bookId={bookId} />
+            <ReviewsSection bookId={bookId} refreshKey={reviewRefreshKey} />
           </div>
 
           {/* Sidebar */}

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
+import axios from "axios";
 
 import { Header } from "../../../components/header";
 import { useAuth } from "../../../context/auth-context";
@@ -50,7 +51,7 @@ export default function EditBookPage() {
   const router = useRouter();
   const params = useParams();
   const bookId = params?.id as string;
-  const { authFetch, isAuthenticated, isLoading } = useAuth();
+  const { authRequest, isAuthenticated, isLoading } = useAuth();
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
 
   const [book, setBook] = useState<Book | null>(null);
@@ -98,43 +99,32 @@ export default function EditBookPage() {
 
       try {
         const [bookRes, authorsRes, publishersRes] = await Promise.all([
-          authFetch(`${baseUrl}/api/v1/books/${bookId}`),
-          authFetch(`${baseUrl}/api/v1/authors`),
-          authFetch(`${baseUrl}/api/v1/publishers`),
+          authRequest<Book>({ url: `${baseUrl}/api/v1/books/${bookId}`, method: "GET" }),
+          authRequest<Author[]>({ url: `${baseUrl}/api/v1/authors`, method: "GET" }),
+          authRequest<Publisher[]>({ url: `${baseUrl}/api/v1/publishers`, method: "GET" }),
         ]);
 
-        if (!bookRes.ok || !authorsRes.ok || !publishersRes.ok) {
-          setError("Unable to load book data.");
-          return;
-        }
-
-        const [bookData, authorsData, publishersData] = await Promise.all([
-          bookRes.json(),
-          authorsRes.json(),
-          publishersRes.json(),
-        ]);
-
-        setBook(bookData);
-        setAuthors(authorsData || []);
-        setPublishers(publishersData || []);
+        setBook(bookRes.data);
+        setAuthors(authorsRes.data || []);
+        setPublishers(publishersRes.data || []);
 
         // Set form values with book data
         reset({
-          title: bookData.title || "",
-          original_title: bookData.original_title || "",
-          summary: bookData.summary || "",
-          pages: String(bookData.pages || ""),
-          edition: bookData.edition || "",
-          release_year: String(bookData.release_year || ""),
-          authorQuery: bookData.author?.name || "",
-          publisherQuery: bookData.publisher?.name || "",
+          title: bookRes.data.title || "",
+          original_title: bookRes.data.original_title || "",
+          summary: bookRes.data.summary || "",
+          pages: String(bookRes.data.pages || ""),
+          edition: bookRes.data.edition || "",
+          release_year: String(bookRes.data.release_year || ""),
+          authorQuery: bookRes.data.author?.name || "",
+          publisherQuery: bookRes.data.publisher?.name || "",
           authorNationality: "",
           authorBiography: "",
         });
 
-        setSelectedAuthor(bookData.author);
-        setSelectedPublisher(bookData.publisher);
-        setImagePreview(bookData.box_cover_url || null);
+        setSelectedAuthor(bookRes.data.author);
+        setSelectedPublisher(bookRes.data.publisher);
+        setImagePreview(bookRes.data.box_cover_url || null);
       } catch {
         setError("Unable to load book data.");
       } finally {
@@ -145,7 +135,7 @@ export default function EditBookPage() {
     if (!isLoading) {
       fetchData();
     }
-  }, [authFetch, baseUrl, isAuthenticated, isLoading, bookId, reset]);
+  }, [authRequest, baseUrl, isAuthenticated, isLoading, bookId, reset]);
 
   const filteredAuthors = useMemo(() => {
     if (!authorQuery.trim()) return authors;
@@ -168,24 +158,24 @@ export default function EditBookPage() {
     setError(null);
 
     try {
-      const response = await authFetch(`${baseUrl}/api/v1/publishers`, {
+      const response = await authRequest<Publisher>({
+        url: `${baseUrl}/api/v1/publishers`,
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ publisher: { name: query } }),
+        data: { publisher: { name: query } },
       });
 
-      const data = await response.json().catch(() => null);
-      if (!response.ok) {
-        setError(data?.errors?.name?.[0] || "Unable to create the publisher.");
-        return;
-      }
-
-      const created = data as Publisher;
+      const created = response.data;
       setPublishers((prev) => [created, ...prev]);
       setSelectedPublisher(created);
       setValue("publisherQuery", created.name, { shouldDirty: true });
       setIsCreatingPublisher(false);
-    } catch {
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const data = error.response?.data as { errors?: Record<string, string[]> } | undefined;
+        setError(data?.errors?.name?.[0] || "Unable to create the publisher.");
+        return;
+      }
       setError("Unable to create the publisher.");
     } finally {
       setIsWorking(false);
@@ -199,32 +189,32 @@ export default function EditBookPage() {
     setError(null);
 
     try {
-      const response = await authFetch(`${baseUrl}/api/v1/authors`, {
+      const response = await authRequest<Author>({
+        url: `${baseUrl}/api/v1/authors`,
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        data: {
           author: {
             name: query,
             nationality: getValues("authorNationality") || "",
             biography: getValues("authorBiography") || "",
           },
-        }),
+        },
       });
 
-      const data = await response.json().catch(() => null);
-      if (!response.ok) {
-        setError(data?.errors?.name?.[0] || "Unable to create the author.");
-        return;
-      }
-
-      const created = data as Author;
+      const created = response.data;
       setAuthors((prev) => [created, ...prev]);
       setSelectedAuthor(created);
       setValue("authorQuery", created.name, { shouldDirty: true });
       setIsCreatingAuthor(false);
       setValue("authorNationality", "");
       setValue("authorBiography", "");
-    } catch {
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const data = error.response?.data as { errors?: Record<string, string[]> } | undefined;
+        setError(data?.errors?.name?.[0] || "Unable to create the author.");
+        return;
+      }
       setError("Unable to create the author.");
     } finally {
       setIsWorking(false);
@@ -255,19 +245,19 @@ export default function EditBookPage() {
         formData.append("book[box_cover]", values.box_cover[0]);
       }
 
-      const response = await authFetch(`${baseUrl}/api/v1/books/${bookId}`, {
+      await authRequest({
+        url: `${baseUrl}/api/v1/books/${bookId}`,
         method: "PATCH",
-        body: formData,
+        data: formData,
       });
 
-      const data = await response.json().catch(() => null);
-      if (!response.ok) {
+      router.push(`/books/${bookId}`);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const data = error.response?.data as { errors?: Record<string, string[]> } | undefined;
         setError(data?.errors?.title?.[0] || "Unable to update the book.");
         return;
       }
-
-      router.push(`/books/${bookId}`);
-    } catch {
       setError("Unable to update the book.");
     } finally {
       setIsWorking(false);

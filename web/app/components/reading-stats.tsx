@@ -2,6 +2,7 @@
 
 import { User } from "lucide-react";
 import { useEffect, useState } from "react";
+import axios from "axios";
 
 interface PlatformStats {
   total_books: number;
@@ -21,12 +22,10 @@ export function ReadingStats() {
     async function fetchStats() {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
-        const response = await fetch(`${baseUrl}/api/v1/platform_statistics`);
-
-        if (response.ok) {
-          const data = await response.json();
-          setStats(data);
-        }
+        const response = await axios.get<PlatformStats>(
+          `${baseUrl}/api/v1/platform_statistics`
+        );
+        setStats(response.data);
       } catch (error) {
         console.error("Error fetching platform stats:", error);
       } finally {

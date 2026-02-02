@@ -2,6 +2,7 @@
 
 import { BookOpen } from "lucide-react";
 import { useEffect, useState } from "react";
+import axios from "axios";
 
 interface Activity {
   id: number;
@@ -20,12 +21,10 @@ export function RecentActivity() {
     async function fetchActivities() {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
-        const response = await fetch(`${baseUrl}/api/v1/platform_statistics`);
-
-        if (response.ok) {
-          const data = await response.json();
-          setActivities(data.recent_activities || []);
-        }
+        const response = await axios.get<{ recent_activities?: Activity[] }>(
+          `${baseUrl}/api/v1/platform_statistics`
+        );
+        setActivities(response.data.recent_activities || []);
       } catch (error) {
         console.error("Error fetching recent activities:", error);
       } finally {
