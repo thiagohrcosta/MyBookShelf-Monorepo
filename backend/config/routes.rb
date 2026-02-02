@@ -41,6 +41,9 @@ Rails.application.routes.draw do
       # Statistics Routes
       get "statistics", to: "statistics#index"
 
+      # Platform Statistics Routes (public data)
+      get "platform_statistics", to: "platform_statistics#index"
+
       # Dashboard Routes
       get "dashboard", to: "dashboard#index"
 
