@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export function HeroSection() {
   return (
@@ -14,12 +15,18 @@ export function HeroSection() {
             you've read throughout the years.
           </p>
           <div className="flex gap-4">
-            <button className="px-6 py-3 bg-amber-900 text-white rounded hover:bg-amber-950 transition-colors font-medium">
+            <Link
+              href="/books/new"
+              className="px-6 py-3 bg-amber-900 text-white rounded hover:bg-amber-950 transition-colors font-medium"
+            >
               Add a book I've read
-            </button>
-            <button className="px-6 py-3 bg-white text-gray-700 border border-gray-300 rounded hover:bg-gray-50 transition-colors font-medium">
+            </Link>
+            <Link
+              href="/library"
+              className="px-6 py-3 bg-white text-gray-700 border border-gray-300 rounded hover:bg-gray-50 transition-colors font-medium"
+            >
               View my library
-            </button>
+            </Link>
           </div>
         </div>
 

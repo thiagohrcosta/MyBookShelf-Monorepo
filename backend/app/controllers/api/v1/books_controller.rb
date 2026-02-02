@@ -28,7 +28,11 @@ module Api
       def create
         @book = current_user.books.new(book_params)
         if @book.save
-          render json: @book, status: :created
+          cover_url = @book.box_cover.attached? ? @book.box_cover.url : nil
+          book_with_cover = @book.as_json(include: { author: { only: [:id, :name] }, publisher: { only: [:id, :name] } }).merge(
+            box_cover_url: cover_url
+          )
+          render json: book_with_cover, status: :created
         else
           render json: { errors: @book.errors }, status: :unprocessable_entity
         end
@@ -37,7 +41,11 @@ module Api
       def update
         @book = Book.find(params[:id])
         if @book.update(book_params)
-          render json: @book, status: :ok
+          cover_url = @book.box_cover.attached? ? @book.box_cover.url : nil
+          book_with_cover = @book.as_json(include: { author: { only: [:id, :name] }, publisher: { only: [:id, :name] } }).merge(
+            box_cover_url: cover_url
+          )
+          render json: book_with_cover, status: :ok
         else
           render json: { errors: @book.errors }, status: :unprocessable_entity
         end

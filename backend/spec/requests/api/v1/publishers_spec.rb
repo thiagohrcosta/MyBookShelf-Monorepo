@@ -11,7 +11,9 @@ RSpec.describe "Api::V1::Publishers", type: :request do
       get '/api/v1/publishers'
 
       expect(response).to have_http_status(:ok)
-      expect(JSON.parse(response.body).size).to eq(2)
+      response_data = JSON.parse(response.body)
+      expect(response_data).to include(hash_including('id' => publisher1.id))
+      expect(response_data).to include(hash_including('id' => publisher2.id))
     end
   end
 
