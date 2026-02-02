@@ -5,6 +5,7 @@ import { ReviewCard } from "./review-card";
 
 interface ReviewsSectionProps {
   bookId: string;
+  refreshKey?: number;
 }
 
 interface Review {
@@ -17,56 +18,97 @@ interface Review {
   likes: number;
 }
 
-export function ReviewsSection({ bookId }: ReviewsSectionProps) {
+interface ApiReview {
+  id: number;
+  rating: number;
+  review: string;
+  user_id: number;
+  book_id: number;
+  created_at: string;
+  updated_at: string;
+}
+
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
+
+function formatReviewDate(dateValue: string) {
+  const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) {
+    return "Recently";
+  }
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function mapReview(review: ApiReview): Review {
+  const author = review.user_id ? `Reader #${review.user_id}` : "Reader";
+  const avatar = review.user_id ? `U${review.user_id}` : "U";
+
+  return {
+    id: review.id,
+    author,
+    avatar,
+    rating: review.rating,
+    date: formatReviewDate(review.created_at),
+    content: review.review,
+    likes: 0
+  };
+}
+
+export function ReviewsSection({ bookId, refreshKey }: ReviewsSectionProps) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Mock reviews - será substituído por dados reais da API
-    const mockReviews: Review[] = [
-      {
-        id: 1,
-        author: "Michael Harrison",
-        avatar: "MH",
-        rating: 5,
-        date: "Feb 9",
-        content:
-          '"An intense psychological drama that delves into the darkest corners of human guilt and redemption"\n\nFyodor Dostoevsky\'s "Crime and Punishment" is a powerful and compelling novel. From the first page, I was drawn into Raskolnikov\'s tortured mindset, experiencing his inner turmoil and justifications for his actions. The psychological tension is palpable as Dostoevsky masterfully explores themes of morality, guilt, and redemption. A must-read for anyone interested in philosophy.',
-        likes: 12,
-      },
-      {
-        id: 2,
-        author: "David Johnson",
-        avatar: "DJ",
-        rating: 5,
-        date: "January 28",
-        content:
-          "A gripping tale of moral conflict. Dostoevsky's 'Crime and Punishment' left me reflecting on ethics and morality. Brilliantly written.",
-        likes: 0,
-      },
-    ];
+    let isActive = true;
 
-    setReviews(mockReviews);
-    setLoading(false);
-  }, [bookId]);
+    async function loadReviews() {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await fetch(`${baseUrl}/api/v1/books/${bookId}/reviews`);
+        if (!response.ok) {
+          throw new Error("Unable to load reviews.");
+        }
+        const data = (await response.json()) as ApiReview[];
+        if (!isActive) return;
+        setReviews((data || []).map(mapReview));
+      } catch {
+        if (!isActive) return;
+        setError("Unable to load reviews.");
+      } finally {
+        if (!isActive) return;
+        setLoading(false);
+      }
+    }
+
+    loadReviews();
+
+    return () => {
+      isActive = false;
+    };
+  }, [bookId, refreshKey]);
 
   if (loading) {
     return <div className="text-gray-500">Loading reviews...</div>;
+  }
+
+  if (error) {
+    return <div className="text-gray-500">{error}</div>;
   }
 
   return (
     <div className="mb-12">
       <h2 className="text-2xl font-serif text-gray-900 mb-6">Reviews</h2>
 
-      <div className="space-y-6">
-        {reviews.map((review) => (
-          <ReviewCard key={review.id} review={review} />
-        ))}
-      </div>
-
-      <button className="mt-8 text-blue-600 hover:text-blue-700 font-medium text-sm">
-        Read all (3) →
-      </button>
+      {reviews.length === 0 ? (
+        <p className="text-sm text-gray-500">No reviews yet. Be the first to share your thoughts.</p>
+      ) : (
+        <div className="space-y-6">
+          {reviews.map((review) => (
+            <ReviewCard key={review.id} review={review} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

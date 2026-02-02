@@ -14,6 +14,7 @@ interface ReviewCardProps {
 }
 
 export function ReviewCard({ review }: ReviewCardProps) {
+  const starRating = Math.round(review.rating / 2);
   return (
     <div className="border-b border-gray-200 pb-6 last:border-b-0">
       <div className="flex gap-4">
@@ -36,13 +37,13 @@ export function ReviewCard({ review }: ReviewCardProps) {
                 key={i}
                 size={14}
                 className={`${
-                  i < review.rating
+                  i < starRating
                     ? "fill-amber-400 text-amber-400"
                     : "text-gray-300"
                 }`}
               />
             ))}
-            <span className="ml-2 text-sm text-gray-600">{review.rating}.0</span>
+            <span className="ml-2 text-sm text-gray-600">{review.rating}/10</span>
           </div>
 
           {/* Review Text */}

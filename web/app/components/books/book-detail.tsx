@@ -10,6 +10,7 @@ import { RatingSection } from "./rating-section";
 import { ReadingStatus } from "./reading-status";
 import { ReviewsSection } from "./reviews-section";
 import { OtherClassicsSection } from "./other-classics-section";
+import { BookReviewForm } from "./book-review-form";
 import { useAuth } from "@/app/context/auth-context";
 
 interface BookList {
@@ -56,7 +57,9 @@ export function BookDetail({ book, bookId }: BookDetailProps) {
   const [readMonth, setReadMonth] = useState<string>("");
   const [readYear, setReadYear] = useState<string>("");
   const [isSaving, setIsSaving] = useState(false);
+  const [bookListLoading, setBookListLoading] = useState(false);
   const [statusError, setStatusError] = useState<string | null>(null);
+  const [reviewRefreshKey, setReviewRefreshKey] = useState(0);
 
   const yearOptions = useMemo(() => {
     const currentYear = new Date().getFullYear();
@@ -68,6 +71,7 @@ export function BookDetail({ book, bookId }: BookDetailProps) {
 
     async function loadBookList() {
       try {
+        setBookListLoading(true);
         const response = await authFetch(`${baseUrl}/api/v1/books/${bookId}/book_list`);
         if (!response.ok) return;
 
@@ -86,6 +90,8 @@ export function BookDetail({ book, bookId }: BookDetailProps) {
         setReadYear(data.read_year ? String(data.read_year) : "");
       } catch {
         // ignore
+      } finally {
+        setBookListLoading(false);
       }
     }
 
@@ -137,6 +143,9 @@ export function BookDetail({ book, bookId }: BookDetailProps) {
     }
   }
 
+  const canReview = isAuthenticated && !bookListLoading && Boolean(bookList);
+  const showReviewForm = isRating && canReview;
+
   return (
     <>
       <Header />
@@ -180,7 +189,8 @@ export function BookDetail({ book, bookId }: BookDetailProps) {
                 <div className="flex gap-3">
                   <button
                     onClick={() => setIsRating(!isRating)}
-                    className="flex-1 bg-amber-50 hover:bg-amber-100 text-amber-900 font-medium py-3 px-4 rounded transition-colors"
+                    disabled={!canReview}
+                    className="flex-1 bg-amber-50 hover:bg-amber-100 text-amber-900 font-medium py-3 px-4 rounded transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     Rate this book
                   </button>
@@ -193,6 +203,32 @@ export function BookDetail({ book, bookId }: BookDetailProps) {
                     </button>
                   )}
                 </div>
+
+                {!isAuthenticated ? (
+                  <p className="text-xs text-gray-500">
+                    Sign in to add this book to your library and leave a review.
+                  </p>
+                ) : null}
+
+                {isAuthenticated && !bookListLoading && !bookList ? (
+                  <p className="text-xs text-gray-500">
+                    Add this book to your library to unlock reviews.
+                  </p>
+                ) : null}
+
+                {bookListLoading ? (
+                  <p className="text-xs text-gray-500">Checking your library status...</p>
+                ) : null}
+
+                {showReviewForm ? (
+                  <BookReviewForm
+                    bookId={bookId}
+                    onReviewCreated={() => {
+                      setReviewRefreshKey((prev) => prev + 1);
+                      setIsRating(false);
+                    }}
+                  />
+                ) : null}
 
                 {isAuthenticated && (
                   <div className="rounded-xl border border-stone-200 bg-white p-4 space-y-4">
@@ -284,7 +320,7 @@ export function BookDetail({ book, bookId }: BookDetailProps) {
             </div>
 
             {/* Reviews Section */}
-            <ReviewsSection bookId={bookId} />
+            <ReviewsSection bookId={bookId} refreshKey={reviewRefreshKey} />
           </div>
 
           {/* Sidebar */}
