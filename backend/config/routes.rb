@@ -32,10 +32,14 @@ Rails.application.routes.draw do
 
       # Book Lists (Shelves) Routes
       resources :book_lists, only: [ :index, :create, :update, :destroy ]
+      get "books/:book_id/book_list", to: "book_lists#show_by_book"
       get "users/:user_id/book_lists", to: "book_lists#user_books"
 
       # Read Books Registry Routes
       resources :read_books, only: [ :index, :create ]
+
+      # Statistics Routes
+      get "statistics", to: "statistics#index"
 
       # Dashboard Routes
       get "dashboard", to: "dashboard#index"
