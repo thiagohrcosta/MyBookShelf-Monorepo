@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import axios from "axios";
 import { BookDetail } from "@/app/components/books/book-detail";
 
 interface BookDetailPageProps {
@@ -11,18 +12,15 @@ async function getBookDetails(id: string) {
     const baseUrl = "http://backend:3000";
     const url = `${baseUrl}/api/v1/books/${id}`;
 
-    const response = await fetch(url, {
-      next: { revalidate: 60 },
-    });
-
-    if (!response.ok) {
-      console.error(`API responded with status ${response.status} for URL: ${url}`);
+    const response = await axios.get(url);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        `API responded with status ${error.response?.status} for URL: ${url}`
+      );
       return null;
     }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
     console.error("Error fetching book:", error);
     return null;
   }

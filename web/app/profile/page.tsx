@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 import { Header } from "../components/header";
 import { useAuth } from "../context/auth-context";
@@ -17,7 +18,7 @@ interface ProfileData {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { authFetch, isAuthenticated, isLoading } = useAuth();
+  const { authRequest, isAuthenticated, isLoading } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isFetching, setIsFetching] = useState(true);
@@ -37,20 +38,17 @@ export default function ProfilePage() {
 
       try {
         const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
-        const response = await authFetch(`${baseUrl}/api/v1/users/profile`);
+        const response = await authRequest<ProfileData>({
+          url: `${baseUrl}/api/v1/users/profile`,
+          method: "GET"
+        });
 
-        if (!response.ok) {
-          if (response.status === 401) {
-            router.replace("/login");
-            return;
-          }
-          setError("Não foi possível carregar seu perfil.");
+        setProfile(response.data);
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          router.replace("/login");
           return;
         }
-
-        const data = (await response.json()) as ProfileData;
-        setProfile(data);
-      } catch {
         setError("Não foi possível carregar seu perfil.");
       } finally {
         setIsFetching(false);
@@ -60,7 +58,7 @@ export default function ProfilePage() {
     if (!isLoading) {
       fetchProfile();
     }
-  }, [authFetch, isAuthenticated, isLoading, router]);
+  }, [authRequest, isAuthenticated, isLoading, router]);
 
   return (
     <div className="min-h-screen bg-stone-50">

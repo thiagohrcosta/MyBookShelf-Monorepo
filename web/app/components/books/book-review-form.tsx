@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import axios from "axios";
 import { useAuth } from "@/app/context/auth-context";
 
 interface BookReviewFormProps {
@@ -11,7 +12,7 @@ interface BookReviewFormProps {
 const ratingOptions = Array.from({ length: 11 }, (_, index) => index);
 
 export function BookReviewForm({ bookId, onReviewCreated }: BookReviewFormProps) {
-  const { authFetch, isAuthenticated } = useAuth();
+  const { authRequest, isAuthenticated } = useAuth();
   const [rating, setRating] = useState<string>("");
   const [review, setReview] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,21 +38,28 @@ export function BookReviewForm({ bookId, onReviewCreated }: BookReviewFormProps)
     setIsSubmitting(true);
 
     try {
-      const response = await authFetch(`${baseUrl}/api/v1/book_reviews`, {
+      const response = await authRequest({
+        url: `${baseUrl}/api/v1/book_reviews`,
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        data: {
           book_review: {
             book_id: Number(bookId),
             rating: Number(rating),
             review: review.trim() || "No comment."
           }
-        })
+        }
       });
 
-      const data = await response.json().catch(() => null);
+      const data = response.data;
 
-      if (!response.ok) {
+      setRating("");
+      setReview("");
+      setSuccess("Your review has been submitted.");
+      onReviewCreated();
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const data = error.response?.data as { errors?: Record<string, string[]> } | undefined;
         const message =
           data?.errors?.review?.[0] ||
           data?.errors?.rating?.[0] ||
@@ -60,12 +68,6 @@ export function BookReviewForm({ bookId, onReviewCreated }: BookReviewFormProps)
         setError(message);
         return;
       }
-
-      setRating("");
-      setReview("");
-      setSuccess("Your review has been submitted.");
-      onReviewCreated();
-    } catch {
       setError("Unable to submit your review.");
     } finally {
       setIsSubmitting(false);

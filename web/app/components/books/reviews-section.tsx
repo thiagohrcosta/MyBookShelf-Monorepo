@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import axios from "axios";
 import { ReviewCard } from "./review-card";
 
 interface ReviewsSectionProps {
@@ -65,11 +66,10 @@ export function ReviewsSection({ bookId, refreshKey }: ReviewsSectionProps) {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch(`${baseUrl}/api/v1/books/${bookId}/reviews`);
-        if (!response.ok) {
-          throw new Error("Unable to load reviews.");
-        }
-        const data = (await response.json()) as ApiReview[];
+        const response = await axios.get<ApiReview[]>(
+          `${baseUrl}/api/v1/books/${bookId}/reviews`
+        );
+        const data = response.data;
         if (!isActive) return;
         setReviews((data || []).map(mapReview));
       } catch {

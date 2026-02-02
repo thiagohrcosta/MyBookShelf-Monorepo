@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 import { Header } from "../components/header";
 import { useAuth } from "../context/auth-context";
 
@@ -52,7 +53,7 @@ const STATUS_META: Record<
 
 export default function MyLibraryPage() {
   const router = useRouter();
-  const { authFetch, isAuthenticated, isLoading } = useAuth();
+  const { authRequest, isAuthenticated, isLoading } = useAuth();
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
 
   const [bookLists, setBookLists] = useState<BookList[]>([]);
@@ -86,14 +87,13 @@ export default function MyLibraryPage() {
       setError(null);
 
       try {
-        const listsResponse = await authFetch(`${baseUrl}/api/v1/book_lists`);
-        if (!listsResponse.ok) {
-          setError("Unable to load library.");
-          return;
-        }
+        const listsResponse = await authRequest<BookList[]>({
+          url: `${baseUrl}/api/v1/book_lists`,
+          method: "GET"
+        });
 
-        const listsData = (await listsResponse.json()) as BookList[];
-        setBookLists(listsData || []);
+        const listsData = listsResponse.data || [];
+        setBookLists(listsData);
 
         const uniqueBookIds = Array.from(
           new Set((listsData || []).map((list) => list.book_id))
@@ -105,27 +105,25 @@ export default function MyLibraryPage() {
         }
 
         const bookResponses = await Promise.all(
-          uniqueBookIds.map((bookId) => authFetch(`${baseUrl}/api/v1/books/${bookId}`))
-        );
-
-        const books = await Promise.all(
-          bookResponses.map((response) => (response.ok ? response.json() : null))
+          uniqueBookIds.map((bookId) =>
+            authRequest<Book>({ url: `${baseUrl}/api/v1/books/${bookId}`, method: "GET" })
+          )
         );
 
         const mappedBooks: Record<number, Book> = {};
-        books.forEach((book) => {
-          if (book) {
-            mappedBooks[book.id] = book as Book;
+        bookResponses.forEach((response) => {
+          if (response.data) {
+            mappedBooks[response.data.id] = response.data;
           }
         });
 
         setBooksById(mappedBooks);
 
-        const booksResponse = await authFetch(`${baseUrl}/api/v1/books`);
-        if (booksResponse.ok) {
-          const booksData = (await booksResponse.json()) as Book[];
-          setAllBooks(booksData || []);
-        }
+        const booksResponse = await authRequest<Book[]>({
+          url: `${baseUrl}/api/v1/books`,
+          method: "GET"
+        });
+        setAllBooks(booksResponse.data || []);
       } catch {
         setError("Unable to load library.");
       } finally {
@@ -134,7 +132,7 @@ export default function MyLibraryPage() {
     }
 
     fetchLibrary();
-  }, [authFetch, baseUrl, isAuthenticated]);
+  }, [authRequest, baseUrl, isAuthenticated]);
 
   const libraryItems = useMemo(() => {
     return bookLists
@@ -181,43 +179,44 @@ export default function MyLibraryPage() {
     setSaveErrorByBookId((prev) => ({ ...prev, [book.id]: "" }));
 
     try {
-      const response = await authFetch(`${baseUrl}/api/v1/book_lists`, {
+      const response = await authRequest<BookList>({
+        url: `${baseUrl}/api/v1/book_lists`,
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        data: {
           book_list: {
             book_id: book.id,
             status: status,
             read_month: readMonth ? Number(readMonth) : undefined,
             read_year: readYear ? Number(readYear) : undefined
           }
-        })
+        }
       });
 
-      const data = await response.json().catch(() => null);
-      if (!response.ok) {
-        setSaveErrorByBookId((prev) => ({
-          ...prev,
-          [book.id]: data?.errors?.read_month?.[0] || "Unable to save status."
-        }));
-        return;
-      }
-
+      const data = response.data;
       setBookLists((prev) => {
         const existingIndex = prev.findIndex((list) => list.book_id === book.id);
         if (existingIndex >= 0) {
           const updated = [...prev];
-          updated[existingIndex] = data as BookList;
+          updated[existingIndex] = data;
           return updated;
         }
-        return [...prev, data as BookList];
+        return [...prev, data];
       });
 
       setBooksById((prev) => ({
         ...prev,
         [book.id]: book
       }));
-    } catch {
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const data = error.response?.data as { errors?: Record<string, string[]> } | undefined;
+        setSaveErrorByBookId((prev) => ({
+          ...prev,
+          [book.id]: data?.errors?.read_month?.[0] || "Unable to save status."
+        }));
+        return;
+      }
       setSaveErrorByBookId((prev) => ({
         ...prev,
         [book.id]: "Unable to save status."

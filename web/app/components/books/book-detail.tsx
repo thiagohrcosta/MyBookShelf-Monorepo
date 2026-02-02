@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 import { Header } from "@/app/components/header";
 import { BookCover } from "./book-cover";
 import { BookHeader } from "./book-header";
@@ -50,7 +51,7 @@ interface BookDetailProps {
 export function BookDetail({ book, bookId }: BookDetailProps) {
   const [isRating, setIsRating] = useState(false);
   const router = useRouter();
-  const { isAuthenticated, authFetch } = useAuth();
+  const { isAuthenticated, authRequest } = useAuth();
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
   const [bookList, setBookList] = useState<BookList | null>(null);
   const [status, setStatus] = useState<string>("");
@@ -72,10 +73,12 @@ export function BookDetail({ book, bookId }: BookDetailProps) {
     async function loadBookList() {
       try {
         setBookListLoading(true);
-        const response = await authFetch(`${baseUrl}/api/v1/books/${bookId}/book_list`);
-        if (!response.ok) return;
+        const response = await authRequest({
+          url: `${baseUrl}/api/v1/books/${bookId}/book_list`,
+          method: "GET"
+        });
 
-        const data = await response.json();
+        const data = response.data;
         if (data?.book_list === null) {
           setBookList(null);
           setStatus("");
@@ -96,7 +99,7 @@ export function BookDetail({ book, bookId }: BookDetailProps) {
     }
 
     loadBookList();
-  }, [authFetch, baseUrl, bookId, isAuthenticated]);
+  }, [authRequest, baseUrl, bookId, isAuthenticated]);
 
   async function handleSaveStatus() {
     if (!status) {
@@ -113,30 +116,32 @@ export function BookDetail({ book, bookId }: BookDetailProps) {
     setStatusError(null);
 
     try {
-      const response = await authFetch(`${baseUrl}/api/v1/book_lists`, {
+      const response = await authRequest({
+        url: `${baseUrl}/api/v1/book_lists`,
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        data: {
           book_list: {
             book_id: book.id,
             status: status,
             read_month: readMonth ? Number(readMonth) : undefined,
             read_year: readYear ? Number(readYear) : undefined
           }
-        })
+        }
       });
 
-      const data = await response.json().catch(() => null);
-      if (!response.ok) {
-        setStatusError(data?.errors?.read_month?.[0] || "Unable to save status.");
-        return;
-      }
+      const data = response.data as BookList;
 
       setBookList(data as BookList);
       setStatus(data.status || status);
       setReadMonth(data.read_month ? String(data.read_month) : readMonth);
       setReadYear(data.read_year ? String(data.read_year) : readYear);
-    } catch {
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const data = error.response?.data as { errors?: Record<string, string[]> } | undefined;
+        setStatusError(data?.errors?.read_month?.[0] || "Unable to save status.");
+        return;
+      }
       setStatusError("Unable to save status.");
     } finally {
       setIsSaving(false);

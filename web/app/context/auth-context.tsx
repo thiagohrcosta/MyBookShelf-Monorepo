@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import axios, { type AxiosRequestConfig, type AxiosResponse } from "axios";
 
 interface AuthUser {
   id: number;
@@ -22,7 +23,7 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<LoginResult>;
   logout: () => Promise<void>;
   getAuthHeaders: () => Record<string, string>;
-  authFetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+  authRequest: <T = unknown>(config: AxiosRequestConfig) => Promise<AxiosResponse<T>>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -63,20 +64,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
 
     try {
-      const response = await fetch(`${baseUrl}/api/v1/users/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
+      const response = await axios.post(`${baseUrl}/api/v1/users/login`, {
+        email,
+        password,
       });
 
-      const data = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        const message = data?.error || "Invalid email or password";
-        return { ok: false, message };
-      }
+      const data = response.data;
 
       if (!data?.token) {
         return { ok: false, message: "Login failed. Please try again." };
@@ -95,6 +88,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       return { ok: true };
     } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const message = error.response?.data?.error || "Unable to sign in. Please try again.";
+        return { ok: false, message };
+      }
       return { ok: false, message: "Unable to sign in. Please try again." };
     }
   }, []);
@@ -104,13 +101,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { Authorization: `Bearer ${token}` };
   }, [token]);
 
-  const authFetch = useCallback(
-    (input: RequestInfo | URL, init?: RequestInit) => {
-      const headers = new Headers(init?.headers || {});
+  const authRequest = useCallback(
+    <T,>(config: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
+      const headers: Record<string, string> = {
+        ...(config.headers as Record<string, string> | undefined),
+      };
       if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
+        headers.Authorization = `Bearer ${token}`;
       }
-      return fetch(input, { ...init, headers });
+      return axios({ ...config, headers });
     },
     [token]
   );
@@ -119,7 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
 
     try {
-      await authFetch(`${baseUrl}/api/v1/users/logout`, { method: "POST" });
+      await authRequest({ url: `${baseUrl}/api/v1/users/logout`, method: "POST" });
     } catch {
       // Ignore logout errors and clear local state anyway
     } finally {
@@ -128,7 +127,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setToken(null);
       setUser(null);
     }
-  }, [authFetch]);
+  }, [authRequest]);
 
   const value = useMemo(
     () => ({
@@ -139,9 +138,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       login,
       logout,
       getAuthHeaders,
-      authFetch,
+      authRequest,
     }),
-    [user, token, isLoading, login, logout, getAuthHeaders, authFetch]
+    [user, token, isLoading, login, logout, getAuthHeaders, authRequest]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
