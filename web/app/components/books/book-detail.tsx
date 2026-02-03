@@ -181,7 +181,13 @@ export function BookDetail({ book, bookId }: BookDetailProps) {
 
                 <RatingSection bookId={bookId} />
 
-                <ReadingStatus />
+                {isAuthenticated && bookList && status && (
+                  <ReadingStatus
+                    status={status}
+                    readMonth={bookList.read_month}
+                    readYear={bookList.read_year}
+                  />
+                )}
 
                 <BookInfo
                   pages={book.pages}
