@@ -16,4 +16,13 @@ class User < ApplicationRecord
 
   validates :full_name, presence: true
   validates :role, presence: true
+
+  def active_subscription?
+    return true if admin?
+
+    subscription.present? &&
+      subscription.active? &&
+      subscription.current_period_end.present? &&
+      subscription.current_period_end > Time.current
+  end
 end

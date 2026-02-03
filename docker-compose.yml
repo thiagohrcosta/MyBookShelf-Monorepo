@@ -28,6 +28,11 @@ services:
       WATCHPACK_POLLING: "true"
       NEXT_PUBLIC_API_BASE_URL: "http://localhost:3000"
       API_BASE_URL: "http://backend:3000"
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
+      STRIPE_PRICE_ID: ${STRIPE_PRICE_ID}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      FRONTEND_URL: http://localhost:3001
     depends_on:
       - backend
 

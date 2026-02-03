@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import axios from "axios";
 import { useAuth } from "@/app/context/auth-context";
+import { subscriptionService } from "@/app/services/subscription";
 
 interface BookReviewFormProps {
   bookId: string;
@@ -12,13 +13,36 @@ interface BookReviewFormProps {
 const ratingOptions = Array.from({ length: 11 }, (_, index) => index);
 
 export function BookReviewForm({ bookId, onReviewCreated }: BookReviewFormProps) {
-  const { authRequest, isAuthenticated } = useAuth();
+  const { authRequest, isAuthenticated, token } = useAuth();
   const [rating, setRating] = useState<string>("");
   const [review, setReview] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
+  const [isCheckingSubscription, setIsCheckingSubscription] = useState(true);
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
+
+  useEffect(() => {
+    async function checkSubscription() {
+      if (!isAuthenticated || !token) {
+        setIsCheckingSubscription(false);
+        return;
+      }
+
+      try {
+        const status = await subscriptionService.getSubscriptionStatus(token);
+        setHasActiveSubscription(status.has_active_subscription);
+      } catch (err) {
+        console.error("Failed to check subscription status", err);
+        setHasActiveSubscription(false);
+      } finally {
+        setIsCheckingSubscription(false);
+      }
+    }
+
+    checkSubscription();
+  }, [isAuthenticated, token]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -27,6 +51,11 @@ export function BookReviewForm({ bookId, onReviewCreated }: BookReviewFormProps)
 
     if (!isAuthenticated) {
       setError("Sign in to submit a review.");
+      return;
+    }
+
+    if (!hasActiveSubscription) {
+      setError("You need an active subscription to submit reviews. Visit your profile to subscribe.");
       return;
     }
 
@@ -127,11 +156,27 @@ export function BookReviewForm({ bookId, onReviewCreated }: BookReviewFormProps)
 
       <button
         type="submit"
-        disabled={isSubmitting}
-        className="w-full rounded-lg bg-amber-900 py-2 text-sm font-medium text-white hover:bg-amber-950 disabled:opacity-70"
+        disabled={isSubmitting || !hasActiveSubscription || isCheckingSubscription}
+        className="w-full rounded-lg bg-amber-900 py-2 text-sm font-medium text-white hover:bg-amber-950 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        title={!hasActiveSubscription && !isCheckingSubscription ? "Active subscription required" : ""}
       >
-        {isSubmitting ? "Submitting..." : "Submit review"}
+        {isCheckingSubscription
+          ? "Checking subscription..."
+          : isSubmitting
+          ? "Submitting..."
+          : !hasActiveSubscription
+          ? "Subscription Required"
+          : "Submit review"}
       </button>
+
+      {!hasActiveSubscription && !isCheckingSubscription && isAuthenticated && (
+        <p className="text-xs text-amber-700 text-center mt-2">
+          You need an active subscription to create reviews.{" "}
+          <a href="/profile" className="underline font-medium hover:text-amber-900">
+            Subscribe now
+          </a>
+        </p>
+      )}
     </form>
   );
 }
