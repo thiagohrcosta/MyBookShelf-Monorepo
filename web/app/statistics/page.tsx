@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { Header } from "../components/header";
+import { Footer } from "../components/footer";
 import { useAuth } from "../context/auth-context";
 import {
   BookOpen,
@@ -355,7 +356,6 @@ export default function StatisticsPage() {
             )}
           </div>
         </div>
-      </main>
-    </div>
+      </main>      <Footer />    </div>
   );
 }

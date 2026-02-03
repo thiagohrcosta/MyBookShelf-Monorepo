@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 
 import { Header } from "../../components/header";
+import { Footer } from "../../components/footer";
 import { useAuth } from "../../context/auth-context";
 
 interface Author {
@@ -534,6 +535,7 @@ export default function NewBookPage() {
           </form>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }
