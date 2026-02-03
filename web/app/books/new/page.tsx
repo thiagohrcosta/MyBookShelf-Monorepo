@@ -238,24 +238,24 @@ export default function NewBookPage() {
     <div className="min-h-screen bg-stone-50">
       <Header />
 
-      <main className="px-6 py-12">
+      <main className="px-4 md:px-6 py-6 md:py-12">
         <div className="max-w-5xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-4xl font-serif text-gray-800">Add a book</h1>
-            <p className="text-gray-600 mt-2">
+          <div className="mb-6 md:mb-8">
+            <h1 className="text-2xl md:text-4xl font-serif text-gray-800">Add a book</h1>
+            <p className="text-sm md:text-base text-gray-600 mt-2">
               Find or create the publisher and author in a single flow.
             </p>
           </div>
 
-          <form className="space-y-8" onSubmit={onSubmit}>
+          <form className="space-y-6 md:space-y-8" onSubmit={onSubmit}>
             {error ? (
               <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                 {error}
               </div>
             ) : null}
 
-            <section className="bg-white border border-stone-200 rounded-2xl shadow-sm p-6">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Publisher</h2>
+            <section className="bg-white border border-stone-200 rounded-2xl shadow-sm p-4 md:p-6">
+              <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-4">Publisher</h2>
 
               {isFetching ? (
                 <div className="text-gray-600">Loading publishers...</div>
@@ -331,8 +331,8 @@ export default function NewBookPage() {
               )}
             </section>
 
-            <section className="bg-white border border-stone-200 rounded-2xl shadow-sm p-6">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Author</h2>
+            <section className="bg-white border border-stone-200 rounded-2xl shadow-sm p-4 md:p-6">
+              <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-4">Author</h2>
 
               {isFetching ? (
                 <div className="text-gray-600">Loading authors...</div>
@@ -429,8 +429,8 @@ export default function NewBookPage() {
               )}
             </section>
 
-            <section className="bg-white border border-stone-200 rounded-2xl shadow-sm p-6">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Book details</h2>
+            <section className="bg-white border border-stone-200 rounded-2xl shadow-sm p-4 md:p-6">
+              <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-4 md:mb-6">Book details</h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-2">

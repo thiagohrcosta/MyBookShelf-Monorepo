@@ -230,17 +230,17 @@ export default function MyLibraryPage() {
   return (
     <div className="min-h-screen bg-stone-50">
       <Header />
-      <main className="max-w-6xl mx-auto px-6 py-10">
-        <div className="flex items-center justify-between mb-8">
+      <main className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-10">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-serif text-gray-900">My Library</h1>
-            <p className="text-gray-600 mt-2">
+            <h1 className="text-2xl md:text-3xl font-serif text-gray-900">My Library</h1>
+            <p className="text-sm md:text-base text-gray-600 mt-2">
               All the books you marked as owned, reading, finished, abandoned, or wishlist.
             </p>
           </div>
           <a
             href="#add-book"
-            className="px-4 py-2 rounded-lg bg-amber-900 text-white text-sm font-medium hover:bg-amber-950 transition-colors"
+            className="px-4 py-2 rounded-lg bg-amber-900 text-white text-sm font-medium hover:bg-amber-950 transition-colors whitespace-nowrap self-start md:self-auto"
           >
             Add from catalog
           </a>
