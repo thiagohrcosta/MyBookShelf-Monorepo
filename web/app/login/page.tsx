@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 import { Header } from "../components/header";
+import { Footer } from "../components/footer";
 import { useAuth } from "../context/auth-context";
 
 export default function LoginPage() {
@@ -117,7 +118,7 @@ export default function LoginPage() {
 
             <p className="mt-6 text-sm text-gray-600">
               New here?{" "}
-              <Link href="#" className="text-amber-900 hover:text-amber-950 font-medium">
+              <Link href="/register" className="text-amber-900 hover:text-amber-950 font-medium">
                 Create an account
               </Link>
             </p>
