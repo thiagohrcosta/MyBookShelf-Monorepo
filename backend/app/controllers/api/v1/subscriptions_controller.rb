@@ -4,9 +4,15 @@ module Api
       before_action :authenticate_user!, except: :webhook
 
       def show
-        @subscription = current_user.subscription
+        # Accept "current" to get the authenticated user's subscription
+        if params[:id] == "current"
+          @subscription = current_user.subscription
+        else
+          @subscription = Subscription.find(params[:id])
+        end
+
         if @subscription
-          render json: @subscription, status: :ok
+          render json: @subscription, serializer: SubscriptionSerializer, status: :ok
         else
           render json: { error: "Subscription not found" }, status: :not_found
         end
@@ -17,9 +23,9 @@ module Api
         @subscription.assign_attributes(subscription_params)
 
         if @subscription.save
-          render json: @subscription, status: :created
+          render json: @subscription, serializer: SubscriptionSerializer, status: :created
         else
-          render json: { errors: @subscription.errors }, status: :unprocessable_entity
+          render json: { errors: @subscription.errors.full_messages }, status: :unprocessable_entity
         end
       end
 

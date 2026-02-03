@@ -48,6 +48,8 @@ gem "rswag-ui"
 # HTTP Client
 gem "httparty"
 
+gem "stripe"
+
 # Serializers
 gem "active_model_serializers"
 

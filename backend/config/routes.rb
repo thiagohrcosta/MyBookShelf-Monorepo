@@ -55,6 +55,14 @@ Rails.application.routes.draw do
       # Subscription Routes
       resources :subscriptions, only: [ :show, :create ]
       post "subscriptions/webhook", to: "subscriptions#webhook"
+      post "subscriptions/cancel", to: "subscription_cancel#create"
+
+      # Stripe Routes
+      post "checkout_sessions", to: "checkout_sessions#create"
+      post "stripe/webhooks", to: "stripe_webhooks#create"
+
+      # Subscription Status
+      get "subscription_status", to: "subscription_status#show"
     end
   end
 end

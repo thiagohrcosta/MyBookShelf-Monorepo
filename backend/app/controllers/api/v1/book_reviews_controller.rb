@@ -2,6 +2,7 @@ module Api
   module V1
     class BookReviewsController < ApplicationController
       before_action :authenticate_user!, only: %i[create destroy]
+      before_action :check_active_subscription!, only: %i[create]
 
       def index
         if params[:book_id]
@@ -39,6 +40,15 @@ module Api
       end
 
       private
+
+      def check_active_subscription!
+        unless current_user.active_subscription?
+          render json: {
+            error: "Active subscription required",
+            message: "You need an active subscription to create reviews"
+          }, status: :forbidden
+        end
+      end
 
       def review_params
         params.require(:book_review).permit(:rating, :review, :book_id)
