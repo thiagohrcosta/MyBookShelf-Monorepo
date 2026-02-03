@@ -47,7 +47,7 @@ export function ReadingStats() {
 
   return (
     <section className="px-8 py-6">
-      <h2 className="text-2xl font-serif text-gray-800 mb-6">Reading Stats</h2>
+      <h2 className="text-2xl font-serif text-gray-800 mb-6">Our Bookshelf Stats</h2>
 
       <div className="grid grid-cols-3 gap-6">
         <div className="bg-white rounded-lg border border-gray-200 p-6 text-center">

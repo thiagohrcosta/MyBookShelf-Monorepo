@@ -5,6 +5,7 @@ import { ReadingStats } from "./components/reading-stats";
 import { RecentActivity } from "./components/recent-activity";
 import { RecentReviews } from "./components/recent-reviews";
 import { RecentlyRated } from "./components/recently-rated";
+import { Footer } from "./components/footer";
 
 export default function HomePage() {
   return (
@@ -33,6 +34,7 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

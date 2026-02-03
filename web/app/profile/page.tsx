@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 
 import { Header } from "../components/header";
+import { Footer } from "../components/footer";
 import { useAuth } from "../context/auth-context";
 
 interface ProfileData {
@@ -112,7 +113,6 @@ export default function ProfilePage() {
             )}
           </div>
         </div>
-      </main>
-    </div>
+      </main>      <Footer />    </div>
   );
 }

@@ -16,11 +16,15 @@ module Api
         # Recent activities - last books read by users
         recent_activities = find_recent_activities
 
+        # Recent users - last 5 users registered
+        recent_users = find_recent_users
+
         render json: {
           total_books: total_books,
           total_pages: total_pages,
           most_read_author: most_read_author,
-          recent_activities: recent_activities
+          recent_activities: recent_activities,
+          recent_users: recent_users
         }, status: :ok
       end
 
@@ -69,6 +73,25 @@ module Api
         else
           "Read"
         end
+      end
+
+      def find_recent_users
+        # Get the last 5 users registered with their stats
+        User.order(created_at: :desc)
+          .limit(5)
+          .map do |user|
+            books_count = user.books.count
+            reviews_count = user.book_reviews.count
+
+            {
+              id: user.id,
+              full_name: user.full_name,
+              email: user.email,
+              books_count: books_count,
+              reviews_count: reviews_count,
+              created_at: user.created_at.strftime("%b %-d")
+            }
+          end
       end
     end
   end

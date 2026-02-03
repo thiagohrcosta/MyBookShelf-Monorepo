@@ -1,5 +1,6 @@
 import { Header } from "../components/header";
 import { ReviewBookCard } from "../components/review-book-card";
+import { Footer } from "../components/footer";
 
 interface BookReviewData {
   id: number;
@@ -75,6 +76,7 @@ export default async function ReviewsPage() {
           )}
         </div>
       </section>
+      <Footer />
     </div>
   );
 }

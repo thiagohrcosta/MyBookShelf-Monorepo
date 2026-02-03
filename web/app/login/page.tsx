@@ -123,7 +123,6 @@ export default function LoginPage() {
             </p>
           </div>
         </div>
-      </main>
-    </div>
+      </main>      <Footer />    </div>
   );
 }

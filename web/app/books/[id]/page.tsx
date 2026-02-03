@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import axios from "axios";
 import { BookDetail } from "@/app/components/books/book-detail";
+import { Footer } from "@/app/components/footer";
 
 interface BookDetailPageProps {
   params: Promise<{ id: string }>;
@@ -53,6 +54,7 @@ export default async function BookDetailPage({ params }: BookDetailPageProps) {
   return (
     <main className="min-h-screen bg-white">
       <BookDetail book={book} bookId={id} />
+      <Footer />
     </main>
   );
 }
