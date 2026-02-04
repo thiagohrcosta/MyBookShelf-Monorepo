@@ -5,6 +5,8 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable
   has_one_attached :avatar
   has_many :book_reviews
+  has_many :book_review_comments, dependent: :destroy
+  has_many :book_review_comment_likes, dependent: :destroy
   has_many :book_lists
   has_many :read_books
   has_one :subscription

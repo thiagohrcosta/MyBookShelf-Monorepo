@@ -31,6 +31,13 @@ Rails.application.routes.draw do
       resources :book_reviews, only: [ :create, :destroy ]
       get "books/:book_id/reviews", to: "book_reviews#index"
       get "book_reviews/recent", to: "book_reviews#recent"
+      resources :book_reviews, only: [] do
+        resources :comments, only: %i[index create], controller: "book_review_comments"
+      end
+      resources :book_review_comments, only: %i[destroy] do
+        post "like", on: :member
+        delete "like", on: :member
+      end
 
       # Book Lists (Shelves) Routes
       resources :book_lists, only: [ :index, :create, :update, :destroy ]

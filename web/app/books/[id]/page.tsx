@@ -8,11 +8,11 @@ interface BookDetailPageProps {
 }
 
 async function getBookDetails(id: string) {
+  const baseUrl = "http://backend:3000";
+  const url = `${baseUrl}/api/v1/books/${id}`;
+
   try {
     // Usar http://backend:3000 para SSR (dentro da rede Docker)
-    const baseUrl = "http://backend:3000";
-    const url = `${baseUrl}/api/v1/books/${id}`;
-
     const response = await axios.get(url);
     return response.data;
   } catch (error) {
