@@ -1,5 +1,5 @@
-import { Heart, MessageCircle } from "lucide-react";
-import { Star } from "lucide-react";
+import { Heart, MessageCircle, Star } from "lucide-react";
+import { ReviewComments } from "./review-comments";
 
 interface ReviewCardProps {
   review: {
@@ -62,6 +62,8 @@ export function ReviewCard({ review }: ReviewCardProps) {
               <span>Reply</span>
             </button>
           </div>
+
+          <ReviewComments reviewId={review.id} />
         </div>
       </div>
     </div>
