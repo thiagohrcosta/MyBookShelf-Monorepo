@@ -25,6 +25,7 @@ export default function HomeScreen() {
         <Image
           source={require('@/assets/images/bannerhome.png')}
           style={styles.homeBannerBackground}
+          contentFit="cover"
         />
         <View style={styles.homeBannerTextContainer}>
           <Text>Organize, track and remember all the books reads throughtout the years</Text>
