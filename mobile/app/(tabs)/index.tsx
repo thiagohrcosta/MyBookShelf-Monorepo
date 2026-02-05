@@ -68,6 +68,7 @@ export default function HomeScreen() {
         <Image
           source={require('@/assets/images/bannerhome.png')}
           style={styles.homeBannerBackground}
+          contentFit="cover"
         />
         <View style={styles.homeBannerTextContainer}>
           <Text style={styles.bannerText}>
