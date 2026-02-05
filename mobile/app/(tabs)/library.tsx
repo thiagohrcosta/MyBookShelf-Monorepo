@@ -66,7 +66,10 @@ export default function LibraryScreen() {
     console.log('Book:', item.title, 'Image URL:', imageUrl);
 
     return (
-      <Pressable style={styles.bookItem}>
+      <Pressable
+        style={styles.bookItem}
+        onPress={() => router.push(`/book/${item.id}`)}
+      >
         {imageUrl ? (
           <Image
             source={{ uri: imageUrl }}

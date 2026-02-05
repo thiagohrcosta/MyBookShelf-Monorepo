@@ -15,6 +15,7 @@ export interface Book {
   author?: Author;
   cover_image_url?: string;
   box_cover_url?: string;
+  created_at?: string;
   publication_year: number;
   description: string;
   isbn: string;
