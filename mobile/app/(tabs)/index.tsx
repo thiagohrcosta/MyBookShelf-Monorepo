@@ -121,7 +121,9 @@ export default function HomeScreen() {
                 return (
                   <Pressable
                     style={styles.recentBookCard}
-                    onPress={() => router.push(`/book/${item.id}`)}
+                    onPress={() =>
+                      router.push({ pathname: '/book/[id]', params: { id: item.id } })
+                    }
                   >
                     {imageUrl ? (
                       <Image

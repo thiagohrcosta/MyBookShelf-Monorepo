@@ -89,7 +89,9 @@ export default function BookDetailScreen() {
         <View style={styles.bookMeta}>
           <Text style={styles.bookTitle}>{book.title}</Text>
           <Text style={styles.bookAuthor}>{book.author?.name || 'Unknown Author'}</Text>
-          <Text style={styles.bookYear}>{book.publication_year}</Text>
+          <Text style={styles.bookYear}>
+            {book.publication_year || book.release_year || '—'}
+          </Text>
           <View style={styles.metaRow}>
             <Text style={styles.metaLabel}>ISBN</Text>
             <Text style={styles.metaValue}>{book.isbn || 'N/A'}</Text>
@@ -100,7 +102,7 @@ export default function BookDetailScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>About the book</Text>
         <Text style={styles.sectionBody}>
-          {book.description || 'No description available.'}
+          {book.description || book.summary || 'No description available.'}
         </Text>
       </View>
     </ScrollView>
