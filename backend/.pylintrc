@@ -1,0 +1,24 @@
+[MASTER]
+jobs=1
+
+[MESSAGES CONTROL]
+disable=
+    C0111,
+    C0103,
+    R0903,
+    W0212
+
+[FORMAT]
+indent-string='  '
+indent-after-paren=2
+max-line-length=100
+
+[BASIC]
+good-names=i,j,k,ex,Run,_,id,db
+
+[DESIGN]
+max-args=7
+max-attributes=10
+
+[IMPORTS]
+allow-wildcard-with-all=yes
