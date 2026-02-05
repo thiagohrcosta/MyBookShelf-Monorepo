@@ -15,8 +15,11 @@ export interface Book {
   author?: Author;
   cover_image_url?: string;
   box_cover_url?: string;
-  publication_year: number;
-  description: string;
+  created_at?: string;
+  publication_year?: number;
+  release_year?: number;
+  description?: string;
+  summary?: string;
   isbn: string;
 }
 
@@ -89,7 +92,7 @@ export const booksService = {
   async getBook(id: number): Promise<Book> {
     try {
       const token = await AsyncStorage.getItem('authToken');
-      const response = await axios.get<{ data: Book }>(
+      const response = await axios.get<any>(
         `${API_BASE_URL}/api/v1/books/${id}`,
         {
           headers: {
@@ -97,8 +100,7 @@ export const booksService = {
           },
         }
       );
-
-      return response.data.data;
+      return response.data.data || response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(error.response?.data?.error || 'Failed to fetch book');

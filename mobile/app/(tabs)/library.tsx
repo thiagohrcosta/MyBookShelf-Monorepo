@@ -66,7 +66,12 @@ export default function LibraryScreen() {
     console.log('Book:', item.title, 'Image URL:', imageUrl);
 
     return (
-      <Pressable style={styles.bookItem}>
+      <Pressable
+        style={styles.bookItem}
+        onPress={() =>
+          router.push({ pathname: '/book/[id]', params: { id: item.id } })
+        }
+      >
         {imageUrl ? (
           <Image
             source={{ uri: imageUrl }}
@@ -85,7 +90,9 @@ export default function LibraryScreen() {
         <Text style={styles.bookAuthor} numberOfLines={1}>
           {item.author?.name || 'Unknown Author'}
         </Text>
-        <Text style={styles.bookYear}>{item.publication_year}</Text>
+        <Text style={styles.bookYear}>
+          {item.publication_year || item.release_year || '—'}
+        </Text>
       </Pressable>
     );
   };
