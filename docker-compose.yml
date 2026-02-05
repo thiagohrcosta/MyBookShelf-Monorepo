@@ -14,6 +14,7 @@ services:
       - ./backend/.env
     depends_on:
       - db
+      - recommendation_system
 
   web:
     build: ./web
@@ -35,6 +36,15 @@ services:
       FRONTEND_URL: http://localhost:3001
     depends_on:
       - backend
+
+  recommendation_system:
+    build: ./recommendation_system
+    container_name: my_bookshelf_recommendation
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./recommendation_system/app:/app/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   db:
     image: postgres:16

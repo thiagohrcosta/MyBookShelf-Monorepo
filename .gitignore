@@ -117,3 +117,27 @@ backend/coverage/*
 backend/storage/*
 backend/node_modules/
 backend/.bundle/
+
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtualenv
+venv/
+.venv/
+recommendation_system/venv/
+recommendation_system/.venv/
+.env
+
+# FastAPI
+*.log
+
+# Pytest
+.pytest_cache/
+
+# Recommendation system caches
+recommendation_system/__pycache__/
+recommendation_system/**/*.pyc
