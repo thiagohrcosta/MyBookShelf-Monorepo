@@ -1,3 +1,9 @@
+import Menu from '@/components/menu';
+import { Book, booksService } from '@/services/books';
+import {
+  PlatformStatistics,
+  platformStatisticsService,
+} from '@/services/platform-statistics';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -10,11 +16,6 @@ import {
   Text,
   View,
 } from 'react-native';
-import { Book, booksService } from '@/services/books';
-import {
-  PlatformStatistics,
-  platformStatisticsService,
-} from '@/services/platform-statistics';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -54,7 +55,9 @@ export default function HomeScreen() {
   }, [recentBooks]);
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <View style={styles.container}>
+      <Menu title="Home" />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
       <View style={styles.titleContainer}>
         <Text style={styles.appTitle}>My Bookshelf</Text>
       </View>
@@ -197,7 +200,8 @@ export default function HomeScreen() {
           </View>
         </>
       )}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -205,6 +209,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f1f0',
+  },
+  scrollView: {
+    flex: 1,
   },
   content: {
     paddingBottom: 32,
