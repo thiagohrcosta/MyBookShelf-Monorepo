@@ -1,8 +1,9 @@
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
-type MenuRoute = "index" | "library" | "explore" | "profile";
+type MenuRoute = "index" | "library" | "review" | "statistics" | "add book" | "profile";
 
 type MenuProps = {
   title: string;
@@ -24,8 +25,8 @@ export default function Menu({ title, showSearch = false, onSearchPress }: MenuP
       router.push("/(tabs)/library");
       return;
     }
-    if (route === "explore") {
-      router.push("/(tabs)/explore");
+    if (route === "review") {
+      router.push("/(tabs)/review");
       return;
     }
     if (route === "profile") {
@@ -53,7 +54,7 @@ export default function Menu({ title, showSearch = false, onSearchPress }: MenuP
                   style={styles.menuItem}
                   onPress={() => handleMenuItemPress('index')}
                 >
-                  <Text style={styles.menuItemIcon}>🏠</Text>
+                  <Ionicons name="home" size={24} color="#333" style={{ marginRight: 16 }} />
                   <Text style={styles.menuItemText}>Home</Text>
                 </Pressable>
 
@@ -61,16 +62,16 @@ export default function Menu({ title, showSearch = false, onSearchPress }: MenuP
                   style={styles.menuItem}
                   onPress={() => handleMenuItemPress('library')}
                 >
-                  <Text style={styles.menuItemIcon}>📚</Text>
+                  <Ionicons name="book" size={24} color="#333" style={{ marginRight: 16 }} />
                   <Text style={styles.menuItemText}>Library</Text>
                 </Pressable>
 
                 <Pressable
                   style={styles.menuItem}
-                  onPress={() => handleMenuItemPress('explore')}
+                  onPress={() => handleMenuItemPress('review')}
                 >
-                  <Text style={styles.menuItemIcon}>✈️</Text>
-                  <Text style={styles.menuItemText}>Explore</Text>
+                  <Ionicons name="star" size={24} color="#333" style={{ marginRight: 16 }} />
+                  <Text style={styles.menuItemText}>Review</Text>
                 </Pressable>
 
                 <View style={styles.menuDivider} />
@@ -84,7 +85,7 @@ export default function Menu({ title, showSearch = false, onSearchPress }: MenuP
                 </Pressable>
 
                 <Pressable style={styles.menuItem} onPress={() => setMenuOpen(false)}>
-                  <Text style={styles.menuItemIcon}>⚙️</Text>
+                  <Ionicons name="settings" size={24} color="#333" style={{ marginRight: 16 }} />
                   <Text style={styles.menuItemText}>Settings</Text>
                 </Pressable>
               </View>
