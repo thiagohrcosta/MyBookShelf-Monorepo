@@ -4,9 +4,13 @@ import { Ionicons as IonIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 
+interface UserProfile {
+  full_name: string;
+  email: string;
+}
 
 export default function ProfilePage() {
-  const [userProfile, setUserProfile] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   const fetchUserProfile = async () => {
     try {
