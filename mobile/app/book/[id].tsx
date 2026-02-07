@@ -1,3 +1,5 @@
+import Menu from '@/components/menu';
+import { Book, booksService } from '@/services/books';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
@@ -9,7 +11,6 @@ import {
   Text,
   View,
 } from 'react-native';
-import { Book, booksService } from '@/services/books';
 
 export default function BookDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -64,14 +65,16 @@ export default function BookDetailScreen() {
   const coverUrl = book.box_cover_url || book.cover_image_url;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.header}>
-        <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backIcon}>←</Text>
-        </Pressable>
-        <Text style={styles.headerTitle}>Book Details</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+    <View style={styles.container}>
+      <Menu title="Book Details" />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
+        <View style={styles.header}>
+          <Pressable style={styles.backButton} onPress={() => router.back()}>
+            <Text style={styles.backIcon}>←</Text>
+          </Pressable>
+          <Text style={styles.headerTitle}>Book Details</Text>
+          <View style={styles.headerSpacer} />
+        </View>
 
       <View style={styles.bookHero}>
         {coverUrl ? (
@@ -105,7 +108,8 @@ export default function BookDetailScreen() {
           {book.description || book.summary || 'No description available.'}
         </Text>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -113,6 +117,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f1f0',
+  },
+  scrollView: {
+    flex: 1,
   },
   content: {
     paddingBottom: 32,

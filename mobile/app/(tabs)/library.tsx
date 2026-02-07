@@ -1,4 +1,7 @@
+import Menu from '@/components/menu';
+import { Book, booksService } from '@/services/books';
 import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -9,8 +12,6 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
-import { booksService, Book } from '@/services/books';
 
 export default function LibraryScreen() {
   const router = useRouter();
@@ -19,7 +20,6 @@ export default function LibraryScreen() {
   const [searchText, setSearchText] = useState('');
   const [selectedTab, setSelectedTab] = useState<'all' | 'reading' | 'finished'>('all');
   const [error, setError] = useState<string | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     fetchBooks();
@@ -47,18 +47,6 @@ export default function LibraryScreen() {
 
   const handleSearch = () => {
     fetchBooks();
-  };
-
-  const handleMenuItemPress = (route: 'index' | 'library' | 'explore') => {
-    setMenuOpen(false);
-    // Navigate to the selected route
-    if (route === 'index') {
-      router.push('/');
-    } else if (route === 'library') {
-      router.push('/(tabs)/library');
-    } else if (route === 'explore') {
-      router.push('/(tabs)/explore');
-    }
   };
 
   const renderBook = ({ item }: { item: Book }) => {
@@ -99,75 +87,7 @@ export default function LibraryScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Menu Drawer */}
-      {menuOpen && (
-        <Pressable
-          style={styles.menuOverlay}
-          onPress={() => setMenuOpen(false)}
-        >
-          <View style={styles.menuDrawer}>
-            <Pressable
-              style={styles.menuCloseButton}
-              onPress={() => setMenuOpen(false)}
-            >
-              <Text style={styles.menuCloseIcon}>✕</Text>
-            </Pressable>
-
-            <View style={styles.menuContent}>
-              <Pressable
-                style={styles.menuItem}
-                onPress={() => handleMenuItemPress('index')}
-              >
-                <Text style={styles.menuItemIcon}>🏠</Text>
-                <Text style={styles.menuItemText}>Home</Text>
-              </Pressable>
-
-              <Pressable
-                style={styles.menuItem}
-                onPress={() => handleMenuItemPress('library')}
-              >
-                <Text style={styles.menuItemIcon}>📚</Text>
-                <Text style={styles.menuItemText}>Library</Text>
-              </Pressable>
-
-              <Pressable
-                style={styles.menuItem}
-                onPress={() => handleMenuItemPress('explore')}
-              >
-                <Text style={styles.menuItemIcon}>✈️</Text>
-                <Text style={styles.menuItemText}>Explore</Text>
-              </Pressable>
-
-              <View style={styles.menuDivider} />
-
-              <Pressable style={styles.menuItem}>
-                <Text style={styles.menuItemIcon}>👤</Text>
-                <Text style={styles.menuItemText}>Profile</Text>
-              </Pressable>
-
-              <Pressable style={styles.menuItem}>
-                <Text style={styles.menuItemIcon}>⚙️</Text>
-                <Text style={styles.menuItemText}>Settings</Text>
-              </Pressable>
-            </View>
-          </View>
-        </Pressable>
-      )}
-
-      {/* Header */}
-      <View style={styles.header}>
-        <Pressable
-          style={styles.menuButton}
-          onPress={() => setMenuOpen(!menuOpen)}
-        >
-          <Text style={styles.menuIcon}>☰</Text>
-        </Pressable>
-        <Text style={styles.headerTitle}>Library</Text>
-        <Pressable style={styles.searchButton}>
-          <Text style={styles.searchIcon}>🔍</Text>
-        </Pressable>
-      </View>
-
+      <Menu title="Library" />
       {/* Search Bar */}
       <View style={styles.searchBarContainer}>
         <Text style={styles.searchIconSmall}>🔍</Text>
@@ -246,85 +166,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f1f0',
-  },
-  menuOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    zIndex: 1000,
-  },
-  menuDrawer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '75%',
-    height: '100%',
-    backgroundColor: '#fff',
-    zIndex: 1001,
-    paddingTop: 16,
-  },
-  menuCloseButton: {
-    padding: 16,
-    alignItems: 'flex-end',
-  },
-  menuCloseIcon: {
-    fontSize: 24,
-    color: '#5d4037',
-    fontWeight: 'bold',
-  },
-  menuContent: {
-    paddingVertical: 8,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  menuItemIcon: {
-    fontSize: 24,
-    marginRight: 16,
-  },
-  menuItemText: {
-    fontSize: 16,
-    color: '#333',
-    fontWeight: '500',
-  },
-  menuDivider: {
-    height: 1,
-    backgroundColor: '#e0e0e0',
-    marginVertical: 8,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#f5f1f0',
-  },
-  menuButton: {
-    padding: 8,
-  },
-  menuIcon: {
-    fontSize: 24,
-    color: '#5d4037',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#5d4037',
-  },
-  searchButton: {
-    padding: 8,
-  },
-  searchIcon: {
-    fontSize: 20,
   },
   searchBarContainer: {
     flexDirection: 'row',
