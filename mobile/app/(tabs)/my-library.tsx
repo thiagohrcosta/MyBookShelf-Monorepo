@@ -1,6 +1,8 @@
 import Menu from '@/components/menu';
 import { myLibrary } from '@/services/my-labrary';
+import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -53,6 +55,7 @@ const STATUS_BADGE_COLORS: Record<BookListStatus, { background: string; text: st
 };
 
 export default function MyLibraryScreen() {
+  const router = useRouter();
   const [libraryItems, setLibraryItems] = useState<LibraryBookListItem[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<StatusFilter>('all');
   const [searchText, setSearchText] = useState('');
@@ -68,7 +71,6 @@ export default function MyLibraryScreen() {
       const data = Array.isArray(response.data) ? response.data : [];
       setLibraryItems(data);
     } catch (err) {
-      console.error('Error fetching my library:', err);
       setError(err instanceof Error ? err.message : 'Failed to load your library');
       setLibraryItems([]);
     } finally {
@@ -101,7 +103,10 @@ export default function MyLibraryScreen() {
     const badgeColors = STATUS_BADGE_COLORS[item.status];
 
     return (
-      <View style={styles.bookItem}>
+      <Pressable
+        style={styles.bookItem}
+        onPress={() => router.push({ pathname: '/book/[id]', params: { id: item.book.id } })}
+      >
         <View style={styles.coverContainer}>
           {imageUrl ? (
             <Image source={{ uri: imageUrl }} style={styles.bookCover} contentFit="cover" />
@@ -124,7 +129,7 @@ export default function MyLibraryScreen() {
             {item.status}
           </Text>
         </View>
-      </View>
+      </Pressable>
     );
   };
 
@@ -133,7 +138,9 @@ export default function MyLibraryScreen() {
       <Menu title="My Library" showSearch={false} />
 
       <View style={styles.searchBarContainer}>
-        <Text style={styles.searchIcon}>🔍</Text>
+        <Text style={styles.searchIcon}>
+          <Ionicons name="search" size={16} color="#999" />
+        </Text>
         <TextInput
           style={styles.searchInput}
           placeholder="Search my books..."
@@ -143,23 +150,19 @@ export default function MyLibraryScreen() {
         />
       </View>
 
-      <FlatList
-        data={STATUS_FILTERS}
-        horizontal
-        keyExtractor={(item) => item.value}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.tabsContainer}
-        renderItem={({ item }) => (
+      <View style={styles.tabsContainer}>
+        {STATUS_FILTERS.map((filter) => (
           <Pressable
-            style={[styles.tab, selectedStatus === item.value && styles.tabActive]}
-            onPress={() => setSelectedStatus(item.value)}
+            key={filter.value}
+            style={[styles.tab, selectedStatus === filter.value && styles.tabActive]}
+            onPress={() => setSelectedStatus(filter.value)}
           >
-            <Text style={[styles.tabText, selectedStatus === item.value && styles.tabTextActive]}>
-              {item.label}
+            <Text style={[styles.tabText, selectedStatus === filter.value && styles.tabTextActive]}>
+              {filter.label}
             </Text>
           </Pressable>
-        )}
-      />
+        ))}
+      </View>
 
       {loading ? (
         <View style={styles.centerContainer}>
@@ -220,6 +223,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 8,
     gap: 8,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
   },
   tab: {
     paddingHorizontal: 14,
