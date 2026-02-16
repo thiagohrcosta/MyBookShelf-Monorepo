@@ -220,6 +220,7 @@ const styles = StyleSheet.create({
   bookCover: {
     width: "100%",
     height: "100%",
+    color: "#ccc",
   },
   placeholderCover: {
     justifyContent: "center",

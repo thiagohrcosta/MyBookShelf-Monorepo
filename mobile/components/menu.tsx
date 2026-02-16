@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
-type MenuRoute = "index" | "library" | "review" | "statistics" | "add book" | "profile";
+type MenuRoute = "index" | "my-library" | "library" | "review" | "statistics" | "add book" | "profile";
 
 type MenuProps = {
   title: string;
@@ -19,6 +19,10 @@ export default function Menu({ title, showSearch = false, onSearchPress }: MenuP
     // Navigate to the selected route
     if (route === "index") {
       router.push("/(tabs)");
+      return;
+    }
+    if (route === "my-library") {
+      router.push("/(tabs)/my-library");
       return;
     }
     if (route === "library") {
@@ -57,6 +61,15 @@ export default function Menu({ title, showSearch = false, onSearchPress }: MenuP
                   <Ionicons name="home" size={24} color="#333" style={{ marginRight: 16 }} />
                   <Text style={styles.menuItemText}>Home</Text>
                 </Pressable>
+
+                 <Pressable
+                  style={styles.menuItem}
+                  onPress={() => handleMenuItemPress('my-library')}
+                >
+                  <Ionicons name="bookmarks" size={24} color="#333" style={{ marginRight: 16 }} />
+                  <Text style={styles.menuItemText}>My Library</Text>
+                </Pressable>
+
 
                 <Pressable
                   style={styles.menuItem}

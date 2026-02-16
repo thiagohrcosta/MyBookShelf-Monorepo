@@ -5,12 +5,15 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Button,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+import BookComents from './comments';
+import truncate from '@/utils/truncate';
 
 export default function BookDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -18,6 +21,7 @@ export default function BookDetailScreen() {
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [ showFullDescription, setShowFullDescription] = useState(false);
 
   const bookId = useMemo(() => Number(id), [id]);
 
@@ -68,14 +72,6 @@ export default function BookDetailScreen() {
     <View style={styles.container}>
       <Menu title="Book Details" />
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <Pressable style={styles.backButton} onPress={() => router.back()}>
-            <Text style={styles.backIcon}>←</Text>
-          </Pressable>
-          <Text style={styles.headerTitle}>Book Details</Text>
-          <View style={styles.headerSpacer} />
-        </View>
-
       <View style={styles.bookHero}>
         {coverUrl ? (
           <Image
@@ -105,8 +101,14 @@ export default function BookDetailScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>About the book</Text>
         <Text style={styles.sectionBody}>
-          {book.description || book.summary || 'No description available.'}
+          {truncate(book.description || book.summary || 'No description available.', showFullDescription ? 5000 : 200)}
         </Text>
+        <Pressable style={styles.readMoreButton} onPress={() => setShowFullDescription(!showFullDescription)}>
+          <Text style={styles.readMoreButtonText}>{showFullDescription ? "Show less" : "Read more"}</Text>
+        </Pressable>
+      </View>
+      <View>
+        <BookComents />
       </View>
       </ScrollView>
     </View>
@@ -240,4 +242,17 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
   },
+  readMoreButton: {
+    marginTop: 8,
+    alignSelf: 'flex-start',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: '#5d4037',
+    borderRadius: 4,
+  },
+  readMoreButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 14,
+  }
 });
