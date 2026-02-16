@@ -86,7 +86,15 @@ export default function MyLibraryScreen() {
     const normalizedSearch = searchText.trim().toLowerCase();
 
     return libraryItems.filter((item) => {
-      const matchesStatus = selectedStatus === 'all' || item.status === selectedStatus;
+      let matchesStatus = false;
+      if (selectedStatus === 'all') {
+        matchesStatus = true;
+      } else if (selectedStatus === 'acquired') {
+        matchesStatus = item.status !== 'wishlist';
+      } else {
+        matchesStatus = item.status === selectedStatus;
+      }
+
       const title = item.book?.title?.toLowerCase() || '';
       const authorName = item.book?.author?.name?.toLowerCase() || '';
       const matchesSearch =
