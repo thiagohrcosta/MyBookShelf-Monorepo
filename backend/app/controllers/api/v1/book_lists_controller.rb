@@ -6,8 +6,8 @@ module Api
       before_action :validate_read_book_params, only: %i[create update]
 
       def index
-        @book_lists = current_user.book_lists
-        render json: @book_lists, status: :ok
+        @book_lists = current_user.book_lists.includes(book: :author)
+        render json: @book_lists.map { |book_list| serialize_book_list(book_list) }, status: :ok
       end
 
       def show_by_book
@@ -97,6 +97,30 @@ module Api
             read_year: [ "can't be blank" ]
           }
         }, status: :unprocessable_entity
+      end
+
+      def serialize_book_list(book_list)
+        {
+          id: book_list.id,
+          book_id: book_list.book_id,
+          status: book_list.status,
+          book: {
+            id: book_list.book.id,
+            title: book_list.book.title,
+            original_title: book_list.book.original_title,
+            summary: book_list.book.summary,
+            pages: book_list.book.pages,
+            edition: book_list.book.edition,
+            release_year: book_list.book.release_year,
+            language_version: book_list.book.language_version,
+            box_cover_url: book_list.book.box_cover.url,
+            author: {
+              id: book_list.book.author.id,
+              name: book_list.book.author.name,
+              biography: book_list.book.author.biography
+            }
+          }
+        }
       end
 
       def book_list_params
