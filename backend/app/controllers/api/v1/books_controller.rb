@@ -91,7 +91,6 @@ module Api
 
       def invalidate_books_cache
         cache_key = "books/all/*"
-        # Rails.cache.delete_matched é mais eficiente para padrões
         Rails.cache.delete_matched(/^books\/all\//)
       end
 
