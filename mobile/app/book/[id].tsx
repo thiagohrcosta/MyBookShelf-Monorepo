@@ -5,7 +5,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Button,
+  Alert,
+  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -16,14 +17,23 @@ import {
 import BookComents from './comments';
 import truncate from '@/utils/truncate';
 import PostBookReview from '@/services/post-book-review';
+import { subscriptionService } from '@/services/subscription';
+import { useAuth } from '@/context/auth-context';
 
 export default function BookDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { token, isAuthenticated } = useAuth();
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [ showFullDescription, setShowFullDescription] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
+  const [isCheckingSubscription, setIsCheckingSubscription] = useState(true);
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
+  const [isStartingCheckout, setIsStartingCheckout] = useState(false);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const [reviewSuccess, setReviewSuccess] = useState<string | null>(null);
 
   const bookId = useMemo(() => Number(id), [id]);
 
@@ -32,38 +42,117 @@ export default function BookDetailScreen() {
   const [review, setReview] = useState("");
 
   const postUserBookReview = async () => {
-    try {
-      const response = await PostBookReview({ rating, review, bookId }).postReview();
-      console.log("Review posted successfully:", response.data);
+    setReviewError(null);
+    setReviewSuccess(null);
+
+    if (!isAuthenticated || !token) {
+      setReviewError('Sign in to submit a review.');
+      return;
     }
-    catch (err) {}
-  }
+
+    if (!hasActiveSubscription) {
+      setReviewError('An active subscription is required to submit reviews.');
+      return;
+    }
+
+    if (rating < 0 || rating > 10) {
+      setReviewError('Rating must be between 0 and 10.');
+      return;
+    }
+
+    setIsSubmittingReview(true);
+
+    try {
+      await PostBookReview({ rating, review: review.trim() || 'No comment.', bookId }).postReview();
+      setReviewSuccess('Your review has been submitted.');
+      setReview('');
+      setRating(0);
+      setUserIsPostingReview(false);
+    }
+    catch {
+      setReviewError('Unable to submit your review. Please try again.');
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
+  const startCheckoutSession = async () => {
+    if (!token) {
+      setReviewError('Sign in to start your subscription.');
+      return;
+    }
+
+    setIsStartingCheckout(true);
+    setReviewError(null);
+
+    try {
+      const checkoutUrl = await subscriptionService.createCheckoutSession(token);
+      const canOpenUrl = await Linking.canOpenURL(checkoutUrl);
+
+      if (!canOpenUrl) {
+        throw new Error('Could not open checkout URL.');
+      }
+
+      await Linking.openURL(checkoutUrl);
+    } catch {
+      Alert.alert('Subscription', 'Unable to open Stripe checkout right now. Please try again.');
+    } finally {
+      setIsStartingCheckout(false);
+    }
+  };
 
   const bookReviewForm = () => {
     return (
       <View style={styles.bookReviewFormContainer}>
+        <Text style={styles.reviewHelperText}>Share your review (premium only)</Text>
         <TextInput
           placeholder="Your review"
           value={review}
           onChangeText={setReview}
-          style={{ borderWidth: 1, borderColor: '#ccc', padding: 8, marginBottom: 8 }}
+          multiline
+          style={styles.reviewInput}
         />
         <TextInput
-          placeholder="Rating (0-5)"
+          placeholder="Rating (0-10)"
           value={rating.toString()}
           onChangeText={(text) => setRating(Number(text))}
           keyboardType="numeric"
-          style={{ borderWidth: 1, borderColor: '#ccc', padding: 8, marginBottom: 8 }}
+          style={styles.reviewInput}
         />
+        {reviewError ? <Text style={styles.reviewErrorText}>{reviewError}</Text> : null}
+        {reviewSuccess ? <Text style={styles.reviewSuccessText}>{reviewSuccess}</Text> : null}
         <Pressable
-          style={styles.buttonFormReview}
+          style={[styles.buttonFormReview, isSubmittingReview && styles.disabledButton]}
           onPress={postUserBookReview}
+          disabled={isSubmittingReview}
         >
-          <Text style={styles.buttonFormReviewText}>Submit Review</Text>
+          <Text style={styles.buttonFormReviewText}>{isSubmittingReview ? 'Submitting...' : 'Submit Review'}</Text>
         </Pressable>
       </View>
-    )
-  }
+    );
+  };
+
+  useEffect(() => {
+    const checkSubscriptionStatus = async () => {
+      if (!isAuthenticated || !token) {
+        setHasActiveSubscription(false);
+        setIsCheckingSubscription(false);
+        return;
+      }
+
+      try {
+        const subscriptionStatus = await subscriptionService.getSubscriptionStatus(token);
+        setHasActiveSubscription(subscriptionStatus.has_active_subscription || subscriptionStatus.is_admin);
+      } catch {
+        setHasActiveSubscription(false);
+      } finally {
+        setIsCheckingSubscription(false);
+      }
+    };
+
+    checkSubscriptionStatus();
+  }, [isAuthenticated, token]);
+
   useEffect(() => {
     const fetchBook = async () => {
       if (!bookId) {
@@ -138,14 +227,33 @@ export default function BookDetailScreen() {
 
       </View>
       <View>
-        {userIsPostingReview ? (
+        {isCheckingSubscription ? (
+          <View style={styles.subscriptionCard}>
+            <ActivityIndicator color="#5d4037" />
+            <Text style={styles.subscriptionInfoText}>Checking subscription...</Text>
+          </View>
+        ) : hasActiveSubscription && userIsPostingReview ? (
           <View>
             {bookReviewForm()}
           </View>
-        ) : (
+        ) : hasActiveSubscription ? (
           <Pressable onPress={() => setUserIsPostingReview(!userIsPostingReview)} style={styles.reviewButton}>
             <Text style={styles.reviewButtonText}>Add Review</Text>
           </Pressable>
+        ) : (
+          <View style={styles.subscriptionCard}>
+            <Text style={styles.subscriptionTitle}>Premium subscription required</Text>
+            <Text style={styles.subscriptionInfoText}>
+              You need an active subscription to create reviews. Start your Stripe checkout to unlock premium features.
+            </Text>
+            <Pressable
+              onPress={startCheckoutSession}
+              style={[styles.reviewButton, isStartingCheckout && styles.disabledButton]}
+              disabled={isStartingCheckout}
+            >
+              <Text style={styles.reviewButtonText}>{isStartingCheckout ? 'Opening Stripe...' : 'Subscribe with Stripe'}</Text>
+            </Pressable>
+          </View>
         )}
 
       </View>
@@ -335,5 +443,51 @@ const styles = StyleSheet.create({
   buttonFormReviewText: {
     color: "#fff",
     textAlign: 'center',
-  }
+  },
+  reviewInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 8,
+    marginBottom: 8,
+    borderRadius: 6,
+    backgroundColor: '#fff',
+  },
+  disabledButton: {
+    opacity: 0.7,
+  },
+  subscriptionCard: {
+    margin: 16,
+    padding: 16,
+    backgroundColor: '#fff5ef',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#f0d6ca',
+    gap: 8,
+  },
+  subscriptionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#4e342e',
+  },
+  subscriptionInfoText: {
+    fontSize: 14,
+    color: '#6d4c41',
+    lineHeight: 20,
+  },
+  reviewHelperText: {
+    fontSize: 14,
+    color: '#5d4037',
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  reviewErrorText: {
+    color: '#c62828',
+    marginBottom: 8,
+    fontSize: 13,
+  },
+  reviewSuccessText: {
+    color: '#2e7d32',
+    marginBottom: 8,
+    fontSize: 13,
+  },
 });

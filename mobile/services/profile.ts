@@ -1,30 +1,27 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
 
 export interface UserProfile {
   id: number;
-  name: string;
+  full_name?: string | null;
   email: string;
-}
-
-export interface UserProfileResponse {
-  data: UserProfile;
+  role?: string | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export const profileService = {
-  async getUserProfile(): Promise<UserProfileResponse> {
-    try {
-      const token = await AsyncStorage.getItem('authToken');
-      const response = axios.get<any>(
-        `${process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000'}/api/v1/users/profile`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          }
-        }
-      );
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  }
-}
+  async getUserProfile(): Promise<UserProfile> {
+    const token = await AsyncStorage.getItem('authToken');
+
+    const response = await axios.get<UserProfile>(`${API_BASE_URL}/api/v1/users/profile`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  },
+};
