@@ -7,7 +7,7 @@
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
 	allow do
-		origins "http://localhost:3001", "http://localhost:3000", "http://localhost:8081", "exp://localhost:8081"
+		origins "http://localhost:3001", "http://localhost:3000", "http://localhost:8081", "exp://localhost:8081", "${ENV['EXPO_PUBLIC_API_URL']}"
 
 		resource "*",
 			headers: :any,

@@ -10,10 +10,12 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import BookComents from './comments';
 import truncate from '@/utils/truncate';
+import PostBookReview from '@/services/post-book-review';
 
 export default function BookDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -25,6 +27,43 @@ export default function BookDetailScreen() {
 
   const bookId = useMemo(() => Number(id), [id]);
 
+  const [userIsPostingReview, setUserIsPostingReview] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [review, setReview] = useState("");
+
+  const postUserBookReview = async () => {
+    try {
+      const response = await PostBookReview({ rating, review, bookId }).postReview();
+      console.log("Review posted successfully:", response.data);
+    }
+    catch (err) {}
+  }
+
+  const bookReviewForm = () => {
+    return (
+      <View style={styles.bookReviewFormContainer}>
+        <TextInput
+          placeholder="Your review"
+          value={review}
+          onChangeText={setReview}
+          style={{ borderWidth: 1, borderColor: '#ccc', padding: 8, marginBottom: 8 }}
+        />
+        <TextInput
+          placeholder="Rating (0-5)"
+          value={rating.toString()}
+          onChangeText={(text) => setRating(Number(text))}
+          keyboardType="numeric"
+          style={{ borderWidth: 1, borderColor: '#ccc', padding: 8, marginBottom: 8 }}
+        />
+        <Pressable
+          style={styles.buttonFormReview}
+          onPress={postUserBookReview}
+        >
+          <Text style={styles.buttonFormReviewText}>Submit Review</Text>
+        </Pressable>
+      </View>
+    )
+  }
   useEffect(() => {
     const fetchBook = async () => {
       if (!bookId) {
@@ -96,8 +135,20 @@ export default function BookDetailScreen() {
             <Text style={styles.metaValue}>{book.isbn || 'N/A'}</Text>
           </View>
         </View>
-      </View>
 
+      </View>
+      <View>
+        {userIsPostingReview ? (
+          <View>
+            {bookReviewForm()}
+          </View>
+        ) : (
+          <Pressable onPress={() => setUserIsPostingReview(!userIsPostingReview)} style={styles.reviewButton}>
+            <Text style={styles.reviewButtonText}>Add Review</Text>
+          </Pressable>
+        )}
+
+      </View>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>About the book</Text>
         <Text style={styles.sectionBody}>
@@ -254,5 +305,35 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
     fontSize: 14,
+  },
+  reviewButton: {
+    margin: 16,
+    paddingVertical: 12,
+    alignSelf: 'center',
+    backgroundColor: '#5d4037',
+    borderRadius: 8,
+    width: '90%',
+  },
+  reviewButtonText: {
+    color: "#fff",
+    textAlign: 'center',
+  },
+  bookReviewFormContainer: {
+    margin: 16,
+    padding: 16,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  buttonFormReview: {
+    marginTop: 8,
+    backgroundColor: '#5d4037',
+    borderRadius: 4,
+    paddingVertical: 10,
+  },
+  buttonFormReviewText: {
+    color: "#fff",
+    textAlign: 'center',
   }
 });
