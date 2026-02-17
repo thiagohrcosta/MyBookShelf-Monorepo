@@ -2,10 +2,12 @@ import Menu from "@/components/menu";
 import { Image } from "expo-image";
 import { reviewsService } from "@/services/reviews";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Pressable,
   StyleSheet,
   Text,
   View,
@@ -28,6 +30,7 @@ interface Publisher {
 
 interface BookReview {
   id: number;
+  book_id: number;
   title: string;
   description?: string;
   box_cover_url: string;
@@ -39,6 +42,7 @@ interface BookReview {
 }
 
 export default function ReviewPage() {
+  const router = useRouter();
   const [bookReviews, setBookReviews] = useState<BookReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -90,7 +94,13 @@ export default function ReviewPage() {
     const author = review.author?.name || "Autor desconhecido";
 
     return (
-      <View key={index} style={styles.reviewCard}>
+      <Pressable
+        key={index}
+        style={styles.reviewCard}
+        onPress={() => router.push({ pathname: `/book/${review.id}` })}
+        android_ripple={{ color: 'rgba(93, 64, 55, 0.1)' }}
+      >
+        {console.log(review)}
         <View style={styles.cardContent}>
           {/* Book Cover */}
           <View style={styles.coverContainer}>
@@ -141,7 +151,7 @@ export default function ReviewPage() {
             )}
           </View>
         </View>
-      </View>
+      </Pressable>
     );
   };
 

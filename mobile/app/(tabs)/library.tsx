@@ -111,25 +111,6 @@ export default function LibraryScreen() {
             All
           </Text>
         </Pressable>
-        <Pressable
-          style={[styles.tab, selectedTab === 'reading' && styles.tabActive]}
-          onPress={() => setSelectedTab('reading')}
-        >
-          <Text style={[styles.tabText, selectedTab === 'reading' && styles.tabTextActive]}>
-            Reading
-          </Text>
-        </Pressable>
-        <Pressable
-          style={[styles.tab, selectedTab === 'finished' && styles.tabActive]}
-          onPress={() => setSelectedTab('finished')}
-        >
-          <Text style={[styles.tabText, selectedTab === 'finished' && styles.tabTextActive]}>
-            Finished
-          </Text>
-        </Pressable>
-        <Pressable style={styles.filterButton}>
-          <Text style={styles.filterIcon}>☰</Text>
-        </Pressable>
       </View>
 
       {/* Books Grid */}
