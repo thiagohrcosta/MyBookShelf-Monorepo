@@ -33,7 +33,13 @@ function RootLayoutContent() {
       <Stack>
         <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="book" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="book/[id]"
+          options={{
+            headerShown: false,
+            animationEnabled: true,
+          }}
+        />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
       </Stack>
       <StatusBar style="auto" />
